@@ -1,0 +1,46 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Installer Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.9'
+
+      - name: Installer les dépendances
+        run: |
+          pip install -r requirements.txt
+          pip install pytest pytest-cov flake8 black
+
+      - name: Vérifier la qualité du code
+        run: |
+          black --check .
+          flake8 .
+
+      - name: Exécuter les tests unitaires
+        run: pytest --cov=app
+
+      - name: Construire l'image Docker
+        run: docker build -t classification-app .
+
+
+      - name: Connexion à Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Pousser l’image Docker
+        run: |
+          docker tag classification-app dockerhubusername/classification-app:latest
+          docker push dockerhubusername/classification-app:latest

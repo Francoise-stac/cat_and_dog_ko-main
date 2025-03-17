@@ -1,0 +1,27 @@
+SEED = 42
+IMAGE_SIZE = 128
+MAX_IMG = 4000
+
+X = []
+count = 0
+y = []
+
+for index_animal, animal in enumerate(['cat', 'dog']):
+    for img_path in glob(os.path.join("pet_images/", animal, "**.jpg")):
+        if count < MAX_IMG:
+            try:
+                image = keras.utils.load_img(img_path)
+                image = image.resize((IMAGE_SIZE, IMAGE_SIZE))
+
+                X.append(keras.utils.img_to_array(image))
+                y.append(index_animal)
+                count += 1
+            except:
+                pass
+    count = 0
+
+X = np.array(X)
+y = np.array(y)
+X = X / 255.
+X.shape, y.shape
+((8000, 128, 128, 3), (8000,))

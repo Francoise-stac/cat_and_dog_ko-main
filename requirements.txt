@@ -1,0 +1,14 @@
+Flask==3.0.3
+keras==3.0.5
+numpy==1.26.4
+tensorflow
+Pillow==10.3.0
+werkzeug>=2.0.0
+mlflow
+flask_sqlalchemy
+flask_migrate
+pytest
+pytest-cov
+flake8
+black
+requests
