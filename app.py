@@ -33,8 +33,10 @@ app = Flask(__name__)
 app.secret_key = "une_clé_secrète_pour_session_et_flash"
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par_défaut')
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///feedback.db"
+# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///feedback.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app/mlflow.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+print("Base de données configurée :", app.config["SQLALCHEMY_DATABASE_URI"])
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -136,19 +138,43 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         password = request.form.get('password')
+        
+#         user = User.query.filter_by(username=username).first()
+
+
+#         if user and user.check_password(password):
+#             session['user_id'] = user.id
+#             flash('Connexion réussie!', 'success')
+#             return redirect(url_for('home'))
+        
+#         flash('Nom d\'utilisateur ou mot de passe incorrect', 'error')
+#     return render_template('login.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            session['user_id'] = user.id
-            flash('Connexion réussie!', 'success')
-            return redirect(url_for('home'))
         
-        flash('Nom d\'utilisateur ou mot de passe incorrect', 'error')
+        if user is None:
+            flash("Nom d'utilisateur incorrect", "danger")
+            return redirect(url_for('login'))
+
+        if not user.check_password(password):
+            flash("Mot de passe incorrect", "danger")
+            return redirect(url_for('login'))
+        
+        session['user_id'] = user.id
+        flash('Connexion réussie!', 'success')
+        return redirect(url_for('home'))
+
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
