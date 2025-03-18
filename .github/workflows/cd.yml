@@ -1,0 +1,41 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        run: |
+          docker build -t your-dockerhub-username/your-app-name .
+          docker tag your-dockerhub-username/your-app-name:latest your-dockerhub-username/your-app-name:latest
+          docker push your-dockerhub-username/your-app-name:latest
+
+      - name: Deploy to Server (SSH)
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            docker pull your-dockerhub-username/your-app-name:latest
+            docker stop my_app_container || true
+            docker rm my_app_container || true
+            docker run -d --name my_app_container -p 8000:8000 your-dockerhub-username/your-app-name:latest
