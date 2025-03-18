@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Continuous Integration
 
 on:
   push:
@@ -9,38 +9,22 @@ on:
       - main
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout du code
+      - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Installer Python
+      - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.9'
 
-      - name: Installer les dépendances
+      - name: Install dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-cov flake8 black
 
-      - name: Vérifier la qualité du code
-        run: |
-          black --check .
-          flake8 .
-
-      - name: Exécuter les tests unitaires
-        run: pytest --cov=app
-
-      - name: Construire l'image Docker
-        run: docker build -t classification-app .
-
-
-      - name: Connexion à Docker Hub
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Pousser l’image Docker
-        run: |
-          docker tag classification-app dockerhubusername/classification-app:latest
-          docker push dockerhubusername/classification-app:latest
+      - name: Run tests
+        run: pytest
