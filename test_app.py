@@ -1,6 +1,19 @@
 import pytest
+from unittest.mock import patch
 from app import app, db
 from models import User, Feedback
+
+@pytest.fixture(autouse=True)
+def mock_mlflow():
+    with patch('mlflow.set_tracking_uri'), \
+         patch('mlflow.set_experiment'), \
+         patch('mlflow.start_run'), \
+         patch('mlflow.end_run'), \
+         patch('mlflow.log_metric'), \
+         patch('mlflow.log_param'), \
+         patch('mlflow.log_artifact'), \
+         patch('mlflow.set_tag'):
+        yield
 
 @pytest.fixture
 def client():

@@ -16,6 +16,9 @@ from flask_sqlalchemy import SQLAlchemy
 from keras.preprocessing import image
 from glob import glob
 import tensorflow as tf
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Paramètres globaux
 SEED = 42
@@ -23,10 +26,7 @@ IMAGE_SIZE = 128
 MAX_IMG = 4000
 
 # Configurer MLflow
-mlflow.set_tracking_uri(
-    "http://127.0.0.0:5001"
-    
-)  # mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 127.0.0.1 --port 5001
+mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI', 'http://127.0.0.1:5001'))
 mlflow.set_experiment("feedback_experiment")
 
 app = Flask(__name__)
