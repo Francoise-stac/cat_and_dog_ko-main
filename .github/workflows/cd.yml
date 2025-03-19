@@ -16,26 +16,40 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Log in to Docker Hub
+      - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t your-dockerhub-username/your-app-name .
-          docker tag your-dockerhub-username/your-app-name:latest your-dockerhub-username/your-app-name:latest
-          docker push your-dockerhub-username/your-app-name:latest
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
 
-      - name: Deploy to Server (SSH)
+      - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            docker pull your-dockerhub-username/your-app-name:latest
-            docker stop my_app_container || true
-            docker rm my_app_container || true
-            docker run -d --name my_app_container -p 8000:8000 your-dockerhub-username/your-app-name:latest
+            # Arrêter et supprimer l'ancien conteneur s'il existe
+            docker stop cat-dog-app || true
+            docker rm cat-dog-app || true
+            
+            # Supprimer l'ancienne image
+            docker image rm ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest || true
+            
+            # Tirer la nouvelle image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
+            
+            # Lancer le nouveau conteneur
+            docker run -d \
+              --name cat-dog-app \
+              -p 5000:5000 \
+              -p 5001:5001 \
+              --restart unless-stopped \
+              ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
