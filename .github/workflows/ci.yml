@@ -34,13 +34,13 @@ jobs:
 
       - name: Download model file
         run: |
-          curl -L -o models/model.keras https://github.com/Francoise-stac/cat_and_dog_ko/raw/main/models/model.keras || touch models/model.keras
+          curl -L -o /app/models/model.keras https://github.com/Francoise-stac/cat_and_dog_ko/raw/main/models/model.keras || touch models/model.keras
 
       - name: Run tests
         run: pytest -v
         env:
           PYTHONPATH: ${{ github.workspace }}
           TESTING: 'True'
-          MODEL_PATH: 'models/model.keras'
+          MODEL_PATH: '/app/models/model.keras'
           FLASK_APP: app.py
           FLASK_ENV: testing
