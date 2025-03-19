@@ -34,7 +34,7 @@ jobs:
 
       - name: Download model file
         run: |
-          curl -L -o models/model.keras https://github.com/Francoise-stac/cat_and_dog_ko/raw/main/models/model.keras || touch models/model.keras
+          curl -L -o models/model.keras https://github.com/Francoise-stac/cat_and_dog_ko-main/raw/main/models/model.keras || touch models/model.keras
 
       - name: Run tests
         run: pytest -v
