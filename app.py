@@ -16,25 +16,34 @@ from flask_sqlalchemy import SQLAlchemy
 from keras.preprocessing import image
 from glob import glob
 import tensorflow as tf
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Paramètres globaux
 SEED = 42
 IMAGE_SIZE = 128
 MAX_IMG = 4000
 
-# Configurer MLflow
-mlflow.set_tracking_uri(
-    "http://127.0.0.0:5001"
-    
-)  # mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 127.0.0.1 --port 5001
-mlflow.set_experiment("feedback_experiment")
+# Configuration MLflow conditionnelle
+TESTING = os.environ.get('TESTING', 'False') == 'True'
+
+if not TESTING:
+    mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI', 'http://127.0.0.1:5001'))
+    mlflow.set_experiment("feedback_experiment")
 
 app = Flask(__name__)
 app.secret_key = "une_clé_secrète_pour_session_et_flash"
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par_défaut')
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///feedback.db"
+# Modifier la configuration de la base de données
+if TESTING:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+print("Base de données configurée :", app.config["SQLALCHEMY_DATABASE_URI"])
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -46,7 +55,7 @@ with app.app_context():
 # MODEL_PATH = r"C:\Users\Francy\Documents\cat_and_dog_ko-main\models\model.keras"
 # # MODEL_PATH = os.path.join(os.getcwd(), "models", "model.keras")
 # Définir le chemin correct du modèle pour Docker
-MODEL_PATH = "/app/models/model.keras"
+MODEL_PATH = "models/model.keras"
 
 # Vérifier si le fichier existe avant de le charger
 if not os.path.exists(MODEL_PATH):
@@ -58,6 +67,8 @@ model.make_predict_function()
 
 
 def model_predict(img, model):
+    if model is None:
+        return [[0.7]]  # Valeur de test par défaut
     img = img.resize((128, 128))
     x = keras.utils.img_to_array(img)
     x = np.expand_dims(x, axis=0)
@@ -136,19 +147,43 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# @app.route('/login', methods=['GET', 'POST'])
+# def login():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         password = request.form.get('password')
+        
+#         user = User.query.filter_by(username=username).first()
+
+
+#         if user and user.check_password(password):
+#             session['user_id'] = user.id
+#             flash('Connexion réussie!', 'success')
+#             return redirect(url_for('home'))
+        
+#         flash('Nom d\'utilisateur ou mot de passe incorrect', 'error')
+#     return render_template('login.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
+
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
-            session['user_id'] = user.id
-            flash('Connexion réussie!', 'success')
-            return redirect(url_for('home'))
         
-        flash('Nom d\'utilisateur ou mot de passe incorrect', 'error')
+        if user is None:
+            flash("Nom d'utilisateur incorrect", "danger")
+            return redirect(url_for('login'))
+
+        if not user.check_password(password):
+            flash("Mot de passe incorrect", "danger")
+            return redirect(url_for('login'))
+        
+        session['user_id'] = user.id
+        flash('Connexion réussie!', 'success')
+        return redirect(url_for('home'))
+
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])

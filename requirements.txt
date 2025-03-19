@@ -12,3 +12,4 @@ pytest-cov
 flake8
 black
 requests
+python-dotenv==1.0.0
