@@ -1,25 +1,26 @@
 import os
 import pytest
 from unittest.mock import patch
-import tempfile
+from io import BytesIO
+from models import User, db
 
 # Configuration pour les tests
 os.environ['TESTING'] = 'True'
 
-@pytest.fixture(autouse=True)
-def app():
-    from app import app as flask_app
-    
-    yield flask_app
+@pytest.fixture
+def flask_app():  # Renommé de 'app' pour éviter les conflits
+    from app import app
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    return app
 
 @pytest.fixture
-def client(app):
-    return app.test_client()
+def client(flask_app):  # Mise à jour pour utiliser flask_app
+    return flask_app.test_client()
 
 @pytest.fixture
-def init_database(app):
-    from app import db
-    with app.app_context():
+def init_database(flask_app):  # Mise à jour pour utiliser flask_app
+    with flask_app.app_context():
         db.create_all()
         yield db
         db.session.remove()
@@ -48,8 +49,8 @@ def mock_model():
 def test_home(client):
     """Teste si la route d'accueil '/' nécessite une connexion"""
     response = client.get('/')
-    assert response.status_code == 302  # Redirection vers la page de login
-    assert b"login" in response.headers['Location']
+    assert response.status_code == 302
+    assert 'login' in response.headers['Location']  # Correction du type string vs bytes
 
 def test_register(client, init_database):
     """Teste l'inscription d'un nouvel utilisateur"""
@@ -61,10 +62,9 @@ def test_register(client, init_database):
     assert response.status_code == 200
     assert "Inscription réussie".encode('utf-8') in response.data
 
-def test_login(client, init_database):
+def test_login(client, init_database, flask_app):  # Ajout de flask_app
     """Teste la connexion d'un utilisateur existant"""
-    # Créer un utilisateur
-    with app.app_context():
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
         user = User(username='testuser', email='testuser@example.com')
         user.set_password('password123')
         db.session.add(user)
@@ -78,10 +78,10 @@ def test_login(client, init_database):
     assert response.status_code == 200
     assert "Connexion réussie".encode('utf-8') in response.data
 
-def test_prediction(client, init_database):
+def test_prediction(client, init_database, flask_app):  # Ajout de flask_app
     """Teste la prédiction avec une image fictive"""
     # Simuler une connexion
-    with app.app_context():
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
         user = User(username='testuser', email='testuser@example.com')
         user.set_password('password123')
         db.session.add(user)
@@ -100,9 +100,9 @@ def test_prediction(client, init_database):
     assert response.status_code == 200
     assert b"Chat" in response.data or b"Chien" in response.data
 
-def test_validate_prediction(client, init_database):
+def test_validate_prediction(client, init_database, flask_app):  # Ajout de flask_app
     """Teste la validation d'une prédiction"""
-    with app.app_context():
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
         user = User(username='testuser', email='testuser@example.com')
         user.set_password('password123')
         db.session.add(user)
@@ -120,9 +120,9 @@ def test_validate_prediction(client, init_database):
     assert response.status_code == 200
     assert "Prédiction validée".encode('utf-8') in response.data
 
-def test_reject_prediction(client, init_database):
+def test_reject_prediction(client, init_database, flask_app):  # Ajout de flask_app
     """Teste le rejet d'une prédiction"""
-    with app.app_context():
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
         user = User(username='testuser', email='testuser@example.com')
         user.set_password('password123')
         db.session.add(user)
@@ -142,10 +142,10 @@ def test_reject_prediction(client, init_database):
     assert response.status_code == 200
     assert "Prédiction rejetée".encode('utf-8') in response.data
 
-def test_db_configuration(app):
+def test_db_configuration(flask_app):  # Mise à jour pour utiliser flask_app
     """Vérifie que la configuration de la base de données est correcte pour les tests"""
-    assert app.config['SQLALCHEMY_DATABASE_URI'] == 'sqlite:///:memory:'
-    assert app.config['TESTING'] == True
+    assert flask_app.config['SQLALCHEMY_DATABASE_URI'] == 'sqlite:///:memory:'
+    assert flask_app.config['TESTING'] is True
 
 def test_db_operations(init_database, client):
     """Teste les opérations de base de données"""
