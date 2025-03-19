@@ -19,4 +19,6 @@ RUN pip install mlflow
 EXPOSE 5000 5001
 
 # Lancer MLflow en arrière-plan puis démarrer Flask
-CMD mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0 --port 5001 & python app.py
+# CMD mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0 --port 5001 & python app.py
+CMD ["sh", "-c", "mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"]
+
