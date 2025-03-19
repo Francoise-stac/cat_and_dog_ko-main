@@ -36,8 +36,12 @@ app = Flask(__name__)
 app.secret_key = "une_clé_secrète_pour_session_et_flash"
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par_défaut')
 
-# app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///feedback.db"
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app/mlflow.db"
+# Modifier la configuration de la base de données
+if TESTING:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 print("Base de données configurée :", app.config["SQLALCHEMY_DATABASE_URI"])
 

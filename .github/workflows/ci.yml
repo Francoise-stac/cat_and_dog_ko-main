@@ -27,8 +27,10 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-mock
 
-      - name: Create models directory
-        run: mkdir -p models
+      - name: Create necessary directories
+        run: |
+          mkdir -p models
+          mkdir -p instance
 
       - name: Download model file
         run: |
@@ -40,3 +42,5 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
           TESTING: 'True'
           MODEL_PATH: 'models/model.keras'
+          FLASK_APP: app.py
+          FLASK_ENV: testing
