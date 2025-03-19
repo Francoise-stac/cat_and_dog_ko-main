@@ -55,7 +55,7 @@ with app.app_context():
 # MODEL_PATH = r"C:\Users\Francy\Documents\cat_and_dog_ko-main\models\model.keras"
 # # MODEL_PATH = os.path.join(os.getcwd(), "models", "model.keras")
 # Définir le chemin correct du modèle pour Docker
-MODEL_PATH = "/app/models/model.keras"
+MODEL_PATH = "models/model.keras"
 
 # Vérifier si le fichier existe avant de le charger
 if not os.path.exists(MODEL_PATH):
