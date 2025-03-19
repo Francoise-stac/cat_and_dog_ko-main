@@ -1,28 +1,42 @@
+import os
 import pytest
 from unittest.mock import patch
 from app import app, db
 from models import User, Feedback
+from io import BytesIO
+
+# Configuration pour les tests
+os.environ['TESTING'] = 'True'
 
 @pytest.fixture(autouse=True)
 def mock_mlflow():
     with patch('mlflow.set_tracking_uri'), \
          patch('mlflow.set_experiment'), \
-         patch('mlflow.start_run'), \
+         patch('mlflow.start_run', return_value=type('obj', (object,), {'__enter__': lambda x: None, '__exit__': lambda x, *args: None})), \
          patch('mlflow.end_run'), \
          patch('mlflow.log_metric'), \
          patch('mlflow.log_param'), \
          patch('mlflow.log_artifact'), \
-         patch('mlflow.set_tag'):
+         patch('mlflow.set_tag'), \
+         patch('mlflow.keras.log_model'):
+        yield
+
+@pytest.fixture(autouse=True)
+def mock_model():
+    with patch('app.model_predict', return_value=[[0.7]]), \
+         patch('app.load_model'), \
+         patch('app.should_retrain_model', return_value=False):
         yield
 
 @pytest.fixture
 def client():
-    app.testing = True
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    
     with app.test_client() as client:
         with app.app_context():
             db.create_all()
-        yield client
-        with app.app_context():
+            yield client
             db.drop_all()
 
 def test_home(client):

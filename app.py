@@ -25,9 +25,12 @@ SEED = 42
 IMAGE_SIZE = 128
 MAX_IMG = 4000
 
-# Configurer MLflow
-mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI', 'http://127.0.0.1:5001'))
-mlflow.set_experiment("feedback_experiment")
+# Configuration MLflow conditionnelle
+TESTING = os.environ.get('TESTING', 'False') == 'True'
+
+if not TESTING:
+    mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI', 'http://127.0.0.1:5001'))
+    mlflow.set_experiment("feedback_experiment")
 
 app = Flask(__name__)
 app.secret_key = "une_clé_secrète_pour_session_et_flash"

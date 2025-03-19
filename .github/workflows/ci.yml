@@ -32,10 +32,11 @@ jobs:
 
       - name: Download model file
         run: |
-          # Si vous avez un modèle pré-entraîné, ajoutez les commandes pour le télécharger ici
-          touch models/model.keras
+          curl -L -o models/model.keras https://github.com/Francoise-stac/cat_and_dog_ko/raw/main/models/model.keras || touch models/model.keras
 
       - name: Run tests
         run: pytest -v
         env:
           PYTHONPATH: ${{ github.workspace }}
+          TESTING: 'True'
+          MODEL_PATH: 'models/model.keras'
