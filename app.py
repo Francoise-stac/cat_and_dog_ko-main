@@ -52,6 +52,8 @@ with app.app_context():
     db.create_all()
 
 # # Charger le modèle
+
+
 # MODEL_PATH = r"C:\Users\Francy\Documents\cat_and_dog_ko-main\models\model.keras"
 # # MODEL_PATH = os.path.join(os.getcwd(), "models", "model.keras")
 # Définir le chemin correct du modèle pour Docker
@@ -147,22 +149,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# @app.route('/login', methods=['GET', 'POST'])
-# def login():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         password = request.form.get('password')
-        
-#         user = User.query.filter_by(username=username).first()
 
-
-#         if user and user.check_password(password):
-#             session['user_id'] = user.id
-#             flash('Connexion réussie!', 'success')
-#             return redirect(url_for('home'))
-        
-#         flash('Nom d\'utilisateur ou mot de passe incorrect', 'error')
-#     return render_template('login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
