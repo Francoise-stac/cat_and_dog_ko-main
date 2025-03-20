@@ -202,8 +202,9 @@ def register():
             return render_template('register.html')
         
         user = User(username=username, email=email)
-        user.set_password(password)
-        
+        user.set_password(password)  # Hacher le mot de passe
+
+        # Ajouter l'utilisateur à la base de données
         db.session.add(user)
         db.session.commit()
         
