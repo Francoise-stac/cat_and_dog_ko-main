@@ -10,6 +10,10 @@ import mlflow
 from datetime import datetime
 from keras import backend as K
 import keras
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 from datab import db, Feedback, User
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -46,7 +50,9 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par
 if TESTING:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
+    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI", "sqlite:///instance/mlflow.db")
+
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 print("Base de données configurée :", app.config["SQLALCHEMY_DATABASE_URI"])

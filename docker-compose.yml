@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  catdog_app:
+    build: .
+    container_name: catdog_app
+    ports:
+      - "5000:5000"   # Flask
+      - "5001:5001"   # MLflow
+    volumes:
+      - ./instance:/app/instance        # Pour stocker la base mlflow.db
+      - ./mlruns:/app/mlruns            # Pour stocker les artefacts MLflow
+      - ./data/retraining:/app/data/retraining  # Pour les images rejetées
+    environment:
+      - MLFLOW_TEMP_DIR=/tmp/mlflow_tmp
+    command: >
+      sh -c "
+        mlflow server --backend-store-uri sqlite:///instance/mlflow.db
+        --default-artifact-root ./mlruns
+        --host 0.0.0.0 --port 5001 & 
+        sleep 5 && python app.py
+      "
