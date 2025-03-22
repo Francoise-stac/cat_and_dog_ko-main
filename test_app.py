@@ -2,7 +2,7 @@ import os
 import pytest
 from unittest.mock import patch
 from io import BytesIO
-from models import User, db
+from datab import User, db
 
 # Configuration pour les tests
 os.environ['TESTING'] = 'True'

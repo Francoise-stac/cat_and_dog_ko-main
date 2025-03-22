@@ -10,13 +10,19 @@ import mlflow
 from datetime import datetime
 from keras import backend as K
 import keras
-from models import db, Feedback, User
+from datab import db, Feedback, User
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from keras.preprocessing import image
 from glob import glob
 import tensorflow as tf
 from dotenv import load_dotenv
+from flask import send_from_directory
+import matplotlib.pyplot as plt
+import os
+
+
+os.environ["MLFLOW_TEMP_DIR"] = "/tmp/mlflow_tmp"
 
 load_dotenv()
 
@@ -85,58 +91,243 @@ def should_retrain_model(threshold=5):
     return num_images >= threshold
 
 
+
+
+def plot_history(history, output_path="training_plot.png"):
+    plt.figure(figsize=(10, 4))
+
+    # Sous-plot 1 : Loss
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history['loss'], label='Loss')
+    if 'val_loss' in history.history:
+        plt.plot(history.history['val_loss'], label='Val Loss')
+    plt.title('Courbe de loss')
+    plt.xlabel('Époque')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    # Sous-plot 2 : Accuracy
+    plt.subplot(1, 2, 2)
+    if 'accuracy' in history.history:
+        plt.plot(history.history['accuracy'], label='Accuracy')
+    if 'val_accuracy' in history.history:
+        plt.plot(history.history['val_accuracy'], label='Val Accuracy')
+    plt.title('Courbe de précision')
+    plt.xlabel('Époque')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    # Sauvegarder le graphique
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.close()
+
+
+# def retrain_model():
+#     print("Réentraînement du modèle...")
+#     IMAGE_SIZE = 128
+#     data_dir = "data/retraining"
+
+#     # Initialisation des listes pour les images et les labels
+#     X = []
+#     y = []
+
+#     for index_animal, animal in enumerate(["chat", "chien"]):
+#         for img_path in glob(os.path.join(data_dir, animal, "*.jpg")):
+#             try:
+#                 # Chargement de l'image
+#                 img = image.load_img(img_path, target_size=(IMAGE_SIZE, IMAGE_SIZE))
+#                 # Conversion en tableau Numpy
+#                 img_array = image.img_to_array(img)
+#                 # Ajout de l'image et du label à la liste
+#                 X.append(img_array)
+#                 y.append(index_animal)
+#             except Exception as e:
+#                 print(f"Erreur lors du chargement de l'image {img_path}: {e}")
+
+#     # Conversion des listes en tableaux Numpy
+#     X = np.array(X)  # Forme (n_samples, 128, 128, 3)
+#     y = np.array(y)  # Forme (n_samples,)
+
+#     # Normalisation des images (valeurs des pixels entre 0 et 1)
+#     X = X / 255.0
+
+#     # Encodage des labels en one-hot encoding
+#     y = keras.utils.to_categorical(y, num_classes=2)
+
+#     # Vérification des formes des données
+#     print(f"Forme de X : {X.shape}")
+#     print(f"Forme de y : {y.shape}")
+
+#     # Charger l'ancien modèle
+#     model = load_model(MODEL_PATH)
+
+#     # Réentraîner le modèle avec les nouvelles données
+#     model.fit(X, y, epochs=5, batch_size=32)
+
+#     # Sauvegarder le modèle mis à jour
+#     model.save(MODEL_PATH)
+#     print(f"Modèle réentraîné et sauvegardé dans : {MODEL_PATH}")
+
+#     # Créer une nouvelle version du modèle dans MLflow
+#     with mlflow.start_run():
+#         mlflow.keras.log_model(
+#             model, "model", registered_model_name="Model_for_User_Feedback"
+#         )
+#         print("Modèle réentraîné sauvegardé dans MLflow.")
+#     mlflow.end_run()
+
+
+# def retrain_model():
+#     print("Réentraînement du modèle...")
+#     IMAGE_SIZE = 128
+#     data_dir = "data/retraining"
+
+#     X = []
+#     y = []
+
+#     for index_animal, animal in enumerate(["chat", "chien"]):
+#         for img_path in glob(os.path.join(data_dir, animal, "*.jpg")):
+#             try:
+#                 img = image.load_img(img_path, target_size=(IMAGE_SIZE, IMAGE_SIZE))
+#                 img_array = image.img_to_array(img)
+#                 X.append(img_array)
+#                 y.append(index_animal)
+#             except Exception as e:
+#                 print(f"Erreur lors du chargement de l'image {img_path}: {e}")
+
+#     X = np.array(X)
+#     y = np.array(y)
+
+#     X = X / 255.0
+#     y = keras.utils.to_categorical(y, num_classes=2)
+
+#     print(f"Forme de X : {X.shape}")
+#     print(f"Forme de y : {y.shape}")
+
+#     model = load_model(MODEL_PATH)
+
+#     # Réentraînement
+#     history = model.fit(X, y, epochs=5, batch_size=32, validation_split=0.2)
+
+#     model.save(MODEL_PATH)
+#     print(f"Modèle réentraîné et sauvegardé dans : {MODEL_PATH}")
+
+#     # Exemple d’entrée pour la signature MLflow
+    
+#     input_example = np.random.rand(1, 128, 128, 3).astype(np.float32)
+
+#     # S’assurer que le dossier existe
+#     os.makedirs("mlflow_logs", exist_ok=True)
+#     np.save("mlflow_logs/input_example.npy", input_example)  # Juste pour test
+
+#     with mlflow.start_run():
+#         # Log du modèle avec signature
+#         mlflow.keras.log_model(
+#             model,
+#             "model",
+#             registered_model_name="Model_for_User_Feedback",
+#             input_example=input_example
+#         )
+
+#         # Log des métriques par époque
+#         for epoch in range(len(history.history['loss'])):
+#             mlflow.log_metric("loss", history.history['loss'][epoch], step=epoch)
+#             if 'accuracy' in history.history:
+#                 mlflow.log_metric("accuracy", history.history['accuracy'][epoch], step=epoch)
+#             if 'val_loss' in history.history:
+#                 mlflow.log_metric("val_loss", history.history['val_loss'][epoch], step=epoch)
+#             if 'val_accuracy' in history.history:
+#                 mlflow.log_metric("val_accuracy", history.history['val_accuracy'][epoch], step=epoch)
+
+#         # Générer et logger une image de la courbe d'apprentissage
+#         plot_history(history, "training_plot.png")
+#         mlflow.log_artifact("training_plot.png")
+
+#         # Log de l'historique complet
+#         print("Modèle réentraîné et métriques enregistrées dans MLflow.")
+
+#     mlflow.end_run()
+
 def retrain_model():
     print("Réentraînement du modèle...")
     IMAGE_SIZE = 128
     data_dir = "data/retraining"
 
-    # Initialisation des listes pour les images et les labels
     X = []
     y = []
 
     for index_animal, animal in enumerate(["chat", "chien"]):
         for img_path in glob(os.path.join(data_dir, animal, "*.jpg")):
             try:
-                # Chargement de l'image
                 img = image.load_img(img_path, target_size=(IMAGE_SIZE, IMAGE_SIZE))
-                # Conversion en tableau Numpy
                 img_array = image.img_to_array(img)
-                # Ajout de l'image et du label à la liste
                 X.append(img_array)
                 y.append(index_animal)
             except Exception as e:
                 print(f"Erreur lors du chargement de l'image {img_path}: {e}")
 
     # Conversion des listes en tableaux Numpy
-    X = np.array(X)  # Forme (n_samples, 128, 128, 3)
-    y = np.array(y)  # Forme (n_samples,)
+    X = np.array(X) # Forme (n_samples, 128, 128, 3)
+    y = np.array(y) # Forme (n_samples,)
 
     # Normalisation des images (valeurs des pixels entre 0 et 1)
     X = X / 255.0
-
-    # Encodage des labels en one-hot encoding
     y = keras.utils.to_categorical(y, num_classes=2)
 
-    # Vérification des formes des données
     print(f"Forme de X : {X.shape}")
     print(f"Forme de y : {y.shape}")
 
-    # Charger l'ancien modèle
     model = load_model(MODEL_PATH)
 
-    # Réentraîner le modèle avec les nouvelles données
-    model.fit(X, y, epochs=5, batch_size=32)
+    # Réentraînement
+    history = model.fit(X, y, epochs=5, batch_size=32, validation_split=0.2)
 
-    # Sauvegarder le modèle mis à jour
     model.save(MODEL_PATH)
-    print(f"Modèle réentraîné et sauvegardé dans : {MODEL_PATH}")
+    print(f"✅ Modèle réentraîné et sauvegardé dans : {MODEL_PATH}")
 
-    # Créer une nouvelle version du modèle dans MLflow
+    # Tentative de log du modèle dans MLflow
+    input_example = np.random.rand(1, 128, 128, 3).astype(np.float32)
+
     with mlflow.start_run():
-        mlflow.keras.log_model(
-            model, "model", registered_model_name="Model_for_User_Feedback"
-        )
-        print("Modèle réentraîné sauvegardé dans MLflow.")
+        try:
+            from mlflow.models.signature import infer_signature
+            signature = infer_signature(input_example, model.predict(input_example))
+
+            mlflow.keras.log_model(
+                model,
+                "model",
+                registered_model_name="Model_for_User_Feedback",
+                input_example=input_example,
+                signature=signature
+            )
+            print("✅ Modèle loggé avec input_example et signature.")
+        except Exception as e:
+            print(f"⚠️ Erreur lors du log avec input_example : {e}")
+            print("📦 Log du modèle sans input_example...")
+            mlflow.keras.log_model(
+                model,
+                "model",
+                registered_model_name="Model_for_User_Feedback"
+            )
+            print("✅ Modèle loggé sans input_example.")
+
+        # Log des métriques par époque
+        for epoch in range(len(history.history['loss'])):
+            mlflow.log_metric("loss", history.history['loss'][epoch], step=epoch)
+            if 'accuracy' in history.history:
+                mlflow.log_metric("accuracy", history.history['accuracy'][epoch], step=epoch)
+            if 'val_loss' in history.history:
+                mlflow.log_metric("val_loss", history.history['val_loss'][epoch], step=epoch)
+            if 'val_accuracy' in history.history:
+                mlflow.log_metric("val_accuracy", history.history['val_accuracy'][epoch], step=epoch)
+
+        # Générer et logger une image de la courbe d'apprentissage
+        plot_history(history, "training_plot.png")
+        mlflow.log_artifact("training_plot.png")
+
+        print("📊 Courbe et métriques enregistrées dans MLflow.")
+
     mlflow.end_run()
 
 
@@ -150,6 +341,29 @@ def login_required(f):
     return decorated_function
 
 
+
+@app.route("/rejected_images")
+def rejected_images():
+    image_dir = "data/retraining"
+    image_data = []
+
+    for label in ["chat", "chien"]:
+        folder_path = os.path.join(image_dir, label)
+        if os.path.exists(folder_path):
+            for file_name in os.listdir(folder_path):
+                if file_name.lower().endswith(".jpg"):
+                    image_data.append({
+                        "label": label,
+                        "filename": file_name,
+                        "filepath": f"/rejected_image/{label}/{file_name}"
+                    })
+
+    return render_template("rejected_images.html", images=image_data)
+
+@app.route("/rejected_image/<label>/<filename>")
+def serve_rejected_image(label, filename):
+    directory = os.path.join("data/retraining", label)
+    return send_from_directory(directory, filename)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -268,6 +482,11 @@ def validate_prediction():
     db.session.commit()
 
     return redirect(url_for("home"))
+
+@app.route("/mlflow_dashboard")
+@login_required
+def mlflow_dashboard():
+    return redirect("http://localhost:5011", code=302)
 
 
 @app.route("/reject_prediction", methods=["POST"])
