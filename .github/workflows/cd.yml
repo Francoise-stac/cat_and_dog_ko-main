@@ -76,5 +76,5 @@ jobs:
           key_path: ./private_key.pem  # Private key with access to the VM
           port: 22
           script: |
-            docker pull nginx
+            sudo docker pull nginx
             
