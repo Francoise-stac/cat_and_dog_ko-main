@@ -25,38 +25,49 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Setup SSH
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+      # - name: Setup SSH
+      #   run: |
+      #     mkdir -p ~/.ssh
+      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+      #     chmod 600 ~/.ssh/id_rsa
+      #     eval $(ssh-agent -s)
+      #     ssh-add ~/.ssh/id_rsa
+      #     ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Deploy to Server
-        env:
-          SERVER_HOST: ${{ secrets.SERVER_HOST }}
-          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-        run: |
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa deploy@${SERVER_HOST} '
-            set -e
-            echo "Testing connection..."
-            whoami
-            docker info
+      # - name: Deploy to Server
+      #   env:
+      #     SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      #   run: |
+      #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa deploy@${SERVER_HOST} '
+      #       set -e
+      #       echo "Testing connection..."
+      #       whoami
+      #       docker info
             
-            echo "Manipulating containers..."
-            docker stop cat-dog-app || true
-            docker rm cat-dog-app || true
+      #       echo "Manipulating containers..."
+      #       docker stop cat-dog-app || true
+      #       docker rm cat-dog-app || true
             
-            echo "Pulling new image..."
-            docker pull '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+      #       echo "Pulling new image..."
+      #       docker pull '"${DOCKER_USERNAME}"'/cat-dog-app:latest
             
-            echo "Starting new container..."
-            docker run -d \
-              --name cat-dog-app \
-              -p 5000:5000 \
-              -p 5001:5001 \
-              --restart unless-stopped \
-              '"${DOCKER_USERNAME}"'/cat-dog-app:latest
-          '
+      #       echo "Starting new container..."
+      #       docker run -d \
+      #         --name cat-dog-app \
+      #         -p 5000:5000 \
+      #         -p 5001:5001 \
+      #         --restart unless-stopped \
+      #         '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+      #     '
+
+      - name: Deploy and Run Docker Container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ec2-3-88-50-111.compute-1.amazonaws.com  # VM IP or hostname
+          username: ubuntu  # Usually 'ubuntu', 'ec2-user', or 'root'
+          key: ${{ secrets.FAIZI_PK }}  # Private key with access to the VM
+          port: 22
+          script: |
+            docker pull nginx
+            
