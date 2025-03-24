@@ -27,38 +27,38 @@ jobs:
 
       - name: Decode SSH Key
         run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > private_key.pem
-          chmod 400 private_key.pem
-          ls
-          cat private_key.pem
+          echo "${{ secrets.FAIZI_PK }}" > ~/.ssh/francis
+          chmod 600 ~/.ssh/francis
+          cat ~/.ssh/francis
+          cat ~/.ssh/francis.pub
       
-      - name: Deploy and Run Docker Container
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key_path: ./private_key.pem
-          port: 22
-          script: |
-            set -e
-            echo "Testing connection..."
-            whoami
-            docker info
+      # - name: Deploy and Run Docker Container
+      #   uses: appleboy/ssh-action@master
+      #   with:
+      #     host: ${{ secrets.SERVER_HOST }}
+      #     username: ${{ secrets.SERVER_USER }}
+      #     key_path: ./private_key.pem
+      #     port: 22
+      #     script: |
+      #       set -e
+      #       echo "Testing connection..."
+      #       whoami
+      #       docker info
             
-            echo "Manipulating containers..."
-            docker stop cat-dog-app || true
-            docker rm cat-dog-app || true
+      #       echo "Manipulating containers..."
+      #       docker stop cat-dog-app || true
+      #       docker rm cat-dog-app || true
             
-            echo "Pulling new image..."
-            docker pull '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+      #       echo "Pulling new image..."
+      #       docker pull '"${DOCKER_USERNAME}"'/cat-dog-app:latest
             
-            echo "Starting new container..."
-            docker run -d \
-              --name cat-dog-app \
-              -p 5000:5000 \
-              -p 5001:5001 \
-              --restart unless-stopped \
-              '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+      #       echo "Starting new container..."
+      #       docker run -d \
+      #         --name cat-dog-app \
+      #         -p 5000:5000 \
+      #         -p 5001:5001 \
+      #         --restart unless-stopped \
+      #         '"${DOCKER_USERNAME}"'/cat-dog-app:latest
 
             
       # - name: Setup SSH
