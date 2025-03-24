@@ -61,6 +61,11 @@ jobs:
       #         '"${DOCKER_USERNAME}"'/cat-dog-app:latest
       #     '
 
+      - name: Decode SSH Key
+        run: |
+          echo "${{ secrets.FAIZI_PK_BASE64 }}" | base64 --decode > private_key.pem
+          chmod 600 private_key.pem
+          
       - name: Deploy and Run Docker Container
         uses: appleboy/ssh-action@master
         with:
