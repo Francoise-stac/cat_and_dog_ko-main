@@ -29,6 +29,8 @@ jobs:
         run: |
           echo "${{ secrets.SSH_PRIVATE_KEY }}" | base64 --decode > private_key.pem
           chmod 400 private_key.pem
+          ls
+          cat private_key.pem
       
       - name: Deploy and Run Docker Container
         uses: appleboy/ssh-action@master
