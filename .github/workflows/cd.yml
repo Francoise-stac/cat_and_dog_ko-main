@@ -34,9 +34,10 @@ jobs:
       - name: Deploy and Run Docker Container
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SERVER_HOST }}
+          host: '134.199.236.159'
           username: ${{ secrets.SERVER_USER }}
-          key_path: ./francis
+          password: '123qweASD'
+          # key_path: ./francis
           port: 22
           script: |
             echo "hello world"
