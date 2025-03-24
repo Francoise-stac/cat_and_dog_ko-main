@@ -1,34 +1,40 @@
 # Use the official Python image as base
-FROM python:3.11
+FROM python:3.11-slim
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy the entire project into the container
-COPY . /app
-
 # Install system dependencies
-RUN apt-get update && apt-get install -y sqlite3 && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends sqlite3 && \
+    rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Ensure the persistent data directory exists
-RUN mkdir -p /app/data
+# Copy the rest of the application
+COPY . .
+
+# Create directories for persistent data
+RUN mkdir -p /app/data /app/artifacts && \
+    chown -R 1000:1000 /app/data /app/artifacts
 
 # Set environment variables
-ENV FLASK_APP=app.py
-ENV FLASK_RUN_HOST=0.0.0.0
-ENV FLASK_ENV=production
-ENV DATABASE_PATH=/app/data/mlflow.db
-ENV MLFLOW_TRACKING_URI=http://127.0.0.1:5001
+ENV FLASK_APP=app.py \
+    FLASK_RUN_HOST=0.0.0.0 \
+    FLASK_ENV=production \
+    DATABASE_PATH=/app/data/mlflow.db \
+    MLFLOW_TRACKING_URI=http://127.0.0.1:5001
 
-# Expose Flask (5000) and MLflow (5001) ports
+# Expose ports
 EXPOSE 5000 5001
 
-# Initialize the SQLite database if it doesn't exist
-RUN sqlite3 /app/data/mlflow.db "PRAGMA journal_mode=WAL;"
+# Set non-root user
+USER 1000
 
-# Command to start MLflow and Flask (ensures MLflow starts first)
+# Command to start MLflow and Flask
 CMD ["sh", "-c", "mlflow server --backend-store-uri sqlite:////app/data/mlflow.db --default-artifact-root /app/artifacts --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"]

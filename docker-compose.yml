@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"  # Flask
+      - "5001:5001"  # MLflow
+    volumes:
+      - app-data:/app/data
+      - app-artifacts:/app/artifacts
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_ENV=production
+      - DATABASE_PATH=/app/data/mlflow.db
+      - MLFLOW_TRACKING_URI=http://127.0.0.1:5001
+    command: >
+      sh -c "mlflow server --backend-store-uri sqlite:////app/data/mlflow.db
+      --default-artifact-root /app/artifacts
+      --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"
+
+volumes:
+  app-data:
+  app-artifacts:
