@@ -47,25 +47,26 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            set -e
-            echo "Testing connection..."
-            whoami
-            docker info
+            ls
+            # set -e
+            # echo "Testing connection..."
+            # whoami
+            # docker info
             
-            echo "Stopping and removing existing container..."
-            docker stop cat-dog-app || true
-            docker rm cat-dog-app || true
+            # echo "Stopping and removing existing container..."
+            # docker stop cat-dog-app || true
+            # docker rm cat-dog-app || true
             
-            echo "Cleaning up old image..."
-            docker image rm ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest || true
+            # echo "Cleaning up old image..."
+            # docker image rm ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest || true
             
-            echo "Pulling new image..."
-            docker pull ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
+            # echo "Pulling new image..."
+            # docker pull ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
             
-            echo "Starting new container..."
-            docker run -d \
-              --name cat-dog-app \
-              -p 5000:5000 \
-              -p 5001:5001 \
-              --restart unless-stopped \
-              ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
+            # echo "Starting new container..."
+            # docker run -d \
+            #   --name cat-dog-app \
+            #   -p 5000:5000 \
+            #   -p 5001:5001 \
+            #   --restart unless-stopped \
+            #   ${{ secrets.DOCKER_USERNAME }}/cat-dog-app:latest
