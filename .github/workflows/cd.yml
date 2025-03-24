@@ -28,15 +28,21 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          # Print key format for debugging (masked in logs)
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | head -n 1
-          # Write key to file with proper line endings
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          # Ensure proper key format with BEGIN and END markers
+          echo "-----BEGIN RSA PRIVATE KEY-----" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | sed 's/ /\n/g' >> ~/.ssh/id_rsa
+          echo "-----END RSA PRIVATE KEY-----" >> ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # Verify key format
-          ssh-keygen -l -f ~/.ssh/id_rsa || (echo "Invalid key format" && exit 1)
+          # Debug key format (safely)
+          if ! ssh-keygen -l -f ~/.ssh/id_rsa > /dev/null 2>&1; then
+            echo "Invalid key format in ~/.ssh/id_rsa"
+            echo "Key file content structure (first and last lines):"
+            head -n 1 ~/.ssh/id_rsa
+            tail -n 1 ~/.ssh/id_rsa
+            exit 1
+          fi
           eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa || (echo "Failed to add key" && cat ~/.ssh/id_rsa && exit 1)
+          ssh-add ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
