@@ -64,7 +64,7 @@ jobs:
       - name: Decode SSH Key
         run: |
           echo "${{ secrets.FAIZI_PK_BASE64 }}" | base64 --decode > private_key.pem
-          chmod 600 private_key.pem
+          chmod 400 private_key.pem
           ls
           cat private_key.pem
 
@@ -73,7 +73,7 @@ jobs:
         with:
           host: ec2-3-88-50-111.compute-1.amazonaws.com  # VM IP or hostname
           username: ubuntu  # Usually 'ubuntu', 'ec2-user', or 'root'
-          key: ${{ secrets.FAIZI_PK_BASE64 }}  # Private key with access to the VM
+          key: ./private_key.pem  # Private key with access to the VM
           port: 22
           script: |
             docker pull nginx
