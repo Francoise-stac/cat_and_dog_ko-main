@@ -31,14 +31,15 @@ jobs:
           chmod 600 ./francis
           cat ./francis
       
-      # - name: Deploy and Run Docker Container
-      #   uses: appleboy/ssh-action@master
-      #   with:
-      #     host: ${{ secrets.SERVER_HOST }}
-      #     username: ${{ secrets.SERVER_USER }}
-      #     key_path: ./private_key.pem
-      #     port: 22
-      #     script: |
+      - name: Deploy and Run Docker Container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key_path: ./francis
+          port: 22
+          script: |
+            echo "hello world"
       #       set -e
       #       echo "Testing connection..."
       #       whoami
