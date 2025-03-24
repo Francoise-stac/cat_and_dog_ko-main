@@ -27,10 +27,9 @@ jobs:
 
       - name: Decode SSH Key
         run: |
-          echo "${{ secrets.FAIZI_PK }}" > ~/.ssh/francis
-          chmod 600 ~/.ssh/francis
-          cat ~/.ssh/francis
-          cat ~/.ssh/francis.pub
+          echo "${{ secrets.FAIZI_PK }}" > ./francis
+          chmod 600 ./francis
+          cat ./francis
       
       # - name: Deploy and Run Docker Container
       #   uses: appleboy/ssh-action@master
