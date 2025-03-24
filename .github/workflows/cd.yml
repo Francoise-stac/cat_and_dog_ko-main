@@ -30,12 +30,17 @@ jobs:
           echo "${{ secrets.FAIZI_PK }}" > ./francis
           chmod 600 ./francis
           cat ./francis
-      
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan 134.199.236.159 >> ~/.ssh/known_hosts
+  
       - name: Deploy and Run Docker Container
         uses: appleboy/ssh-action@master
         with:
           host: '134.199.236.159'
-          username: ${{ secrets.SERVER_USER }}
+          username: 'root'
           password: '123qweASD'
           # key_path: ./francis
           port: 22
