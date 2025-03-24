@@ -28,10 +28,15 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          # Print key format for debugging (masked in logs)
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | head -n 1
+          # Write key to file with proper line endings
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
+          # Verify key format
+          ssh-keygen -l -f ~/.ssh/id_rsa || (echo "Invalid key format" && exit 1)
           eval $(ssh-agent -s)
-          ssh-add ~/.ssh/id_rsa
+          ssh-add ~/.ssh/id_rsa || (echo "Failed to add key" && cat ~/.ssh/id_rsa && exit 1)
           ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to Server
