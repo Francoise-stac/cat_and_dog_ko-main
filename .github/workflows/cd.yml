@@ -44,7 +44,7 @@ jobs:
             docker rm cat-dog-app || true
             
             echo "Pulling new image..."
-            docker pull '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+            docker pull '"${{ secrets.DOCKER_USERNAME }}"'/cat-dog-app:latest
             
             echo "Starting new container..."
             docker run -d \
@@ -52,7 +52,7 @@ jobs:
               -p 5000:5000 \
               -p 5001:5001 \
               --restart unless-stopped \
-              '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+              '"${{ secrets.DOCKER_USERNAME }}"'/cat-dog-app:latest
 
             
       # - name: Setup SSH
@@ -80,7 +80,7 @@ jobs:
       #       docker rm cat-dog-app || true
             
       #       echo "Pulling new image..."
-      #       docker pull '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+      #       docker pull '"${{ secrets.DOCKER_USERNAME }}"'/cat-dog-app:latest
             
       #       echo "Starting new container..."
       #       docker run -d \
@@ -88,5 +88,5 @@ jobs:
       #         -p 5000:5000 \
       #         -p 5001:5001 \
       #         --restart unless-stopped \
-      #         '"${DOCKER_USERNAME}"'/cat-dog-app:latest
+      #         '"${{ secrets.DOCKER_USERNAME }}"'/cat-dog-app:latest
       #     '
