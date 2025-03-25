@@ -1,4 +1,4 @@
-from datab import db, Feedback
+from models import db, Feedback
 import pandas as pd
 
 def fetch_feedback_data():
@@ -88,7 +88,7 @@ def plot_sample_images(images, labels, num_images=5):
 
 
 from flask import Flask
-from datab import db, Feedback
+from models import db, Feedback
 import pandas as pd
 
 app = Flask(__name__)
