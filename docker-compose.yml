@@ -4,8 +4,8 @@ services:
   app:
     build: .
     ports:
-      - "5000:5000"  # Flask
-      - "5001:5001"  # MLflow
+      - "5000:5000"
+      - "5001:5001"
     volumes:
       - app-data:/app/data
       - app-artifacts:/app/artifacts
