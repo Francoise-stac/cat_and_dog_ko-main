@@ -25,6 +25,7 @@ SEED = 42
 IMAGE_SIZE = 128
 MAX_IMG = 4000
 
+
 # Configuration MLflow conditionnelle
 TESTING = os.environ.get('TESTING', 'False') == 'True'
 
