@@ -81,9 +81,10 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4  # Updated from v2 to v4
         with:
           name: test-logs
           path: |
             pytest-logs.txt
             .pytest_cache
+          retention-days: 5  # Optional: specify how long to keep the artifacts
