@@ -40,7 +40,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par
 if TESTING:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data/mlflow.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 print("Base de données configurée :", app.config["SQLALCHEMY_DATABASE_URI"])
