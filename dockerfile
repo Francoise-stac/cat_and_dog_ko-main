@@ -1,24 +1,40 @@
-# Utiliser une image Python 3.11 comme base
-FROM python:3.11
+# Use the official Python image as base
+FROM python:3.11-slim
 
-# Définir le dossier de travail
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copier tous les fichiers du projet dans le conteneur
-COPY . /app
+# Install system dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends sqlite3 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Installer les dépendances
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-RUN pip install mlflow
-# Installer les dépendances
-# RUN pip install --upgrade pip && \
-#     pip install -r requirements.txt mlflow
+# Copy requirements first for better caching
+COPY requirements.txt .
 
-# Exposer les ports Flask (5000) et MLflow (5001)
+# Install Python dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application
+COPY . .
+
+# Create directories for persistent data
+RUN mkdir -p /app/data /app/artifacts && \
+    chown -R 1000:1000 /app/data /app/artifacts
+
+# Set environment variables
+ENV FLASK_APP=app.py \
+    FLASK_RUN_HOST=0.0.0.0 \
+    FLASK_ENV=production \
+    DATABASE_PATH=/app/data/mlflow.db \
+    MLFLOW_TRACKING_URI=http://127.0.0.1:5001
+
+# Expose ports
 EXPOSE 5000 5001
 
-# Lancer MLflow en arrière-plan puis démarrer Flask
-# CMD mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0 --port 5001 & python app.py
-CMD ["sh", "-c", "mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"]
+# Set non-root user
+USER 1000
 
+# Command to start MLflow and Flask
+CMD ["sh", "-c", "mlflow server --backend-store-uri sqlite:////app/data/mlflow.db --default-artifact-root /app/artifacts --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"]
