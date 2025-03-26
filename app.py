@@ -17,6 +17,8 @@ from keras.preprocessing import image
 from glob import glob
 import tensorflow as tf
 from dotenv import load_dotenv
+from logging_config import setup_logging
+from prometheus_flask_exporter import PrometheusMetrics
 
 load_dotenv()
 
@@ -50,6 +52,13 @@ migrate = Migrate(app, db)
 
 with app.app_context():
     db.create_all()
+
+# Initialisation du logging
+setup_logging(app)
+
+# Après avoir créé l'application Flask :
+metrics = PrometheusMetrics(app)
+metrics.info('flask_app_info', 'Application Flask en cours d’exécution', version='1.0.0')
 
 # # Charger le modèle
 # MODEL_PATH = r"C:\Users\Francy\Documents\cat_and_dog_ko-main\models\model.keras"

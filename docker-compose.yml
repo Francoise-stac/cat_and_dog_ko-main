@@ -20,6 +20,23 @@ services:
       --default-artifact-root /app/artifacts
       --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"
 
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - ./loki-config.yaml:/etc/loki/local-config.yaml
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - /var/log:/var/log
+      - /app/logs:/var/log/app  # Montrez le dossier de logs de votre app
+    command: -config.file=/etc/promtail/config.yml
+    volumes:
+      - ./promtail-config.yml:/etc/promtail/config.yml
+
 volumes:
   app-data:
   app-artifacts:

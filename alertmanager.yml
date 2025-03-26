@@ -1,0 +1,14 @@
+route:
+  receiver: 'email-notifications'
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 1h
+
+receivers:
+  - name: 'email-notifications'
+    email_configs:
+      - to: 'admin@example.com'
+        from: 'monitoring@example.com'
+        smarthost: 'smtp.example.com:587'
+        auth_username: 'user@example.com'
+        auth_password: 'password'
