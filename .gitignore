@@ -1,7 +1,30 @@
+# Dossiers d’environnement virtuel
+venv/
+venv311/
+
+# Cache Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Fichiers système Mac
 .DS_Store
-venv
-__pycache__
+
+# Clés SSH ou autres credentials (⚠️ très sensibles)
 deploy_key
 deploy_key.pub
 id_rsa.pem
-venv311/
+
+# Logs
+*.log
+
+# Fichiers temporaires
+*.tmp
+*.swp
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
+
+# Dossier de tracking MLflow (si tu l’utilises)
+mlruns/
