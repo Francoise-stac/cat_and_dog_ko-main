@@ -1,0 +1,14 @@
+aliases: []
+creation_timestamp: 1743025781617
+current_stage: None
+description: null
+last_updated_timestamp: 1743025781617
+name: Model_for_User_Feedback
+run_id: 25009d16e1fb432998aa85a370214295
+run_link: null
+source: file:///C:/Users/Francy/Documents/cat_and_dog_ko-main/artifacts/419635633295998848/25009d16e1fb432998aa85a370214295/artifacts/retrained_models
+status: READY
+status_message: null
+storage_location: file:///C:/Users/Francy/Documents/cat_and_dog_ko-main/artifacts/419635633295998848/25009d16e1fb432998aa85a370214295/artifacts/retrained_models
+user_id: null
+version: 2
