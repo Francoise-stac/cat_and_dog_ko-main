@@ -1,8 +1,9 @@
+import os
+import logging
 from flask import Flask, request, render_template, redirect, url_for, flash, session
 from functools import wraps
 import numpy as np
 from keras.models import load_model
-import os
 from io import BytesIO
 from PIL import Image
 import base64
@@ -17,47 +18,63 @@ from keras.preprocessing import image
 from glob import glob
 import tensorflow as tf
 from dotenv import load_dotenv
-import traceback  # à mettre en haut de ton fichier si pas encore importé
+import traceback
 from mlflow.exceptions import MlflowException
-import os
+from flask_monitoringdashboard import bind, config
+from mlflow_config import get_or_create_experiment
+import flask_monitoringdashboard as dashboard
+
+
+# Important pour éviter que .dashboard.cfg interfère
+config.init_from(file=False)
+config.security_token = None
+config.basicAuth = False
 
 
 
-import numpy as np
+experiment_id = get_or_create_experiment()
 
-load_dotenv()
+instance_path = os.path.abspath("instance")
 
-# Paramètres globaux
+# 🧠 Créer l'application après la config
+app = Flask(__name__)
+
+
+bind(app)
+
+# load_dotenv()
+
+
+app.secret_key = "une_clé_secrète_pour_session_et_flash"
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par_défaut')
+
+# Journalisation
+os.makedirs("logs", exist_ok=True)
+logging.basicConfig(
+    filename="logs/app.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logging.info("🚀 Application démarrée.")
+
 SEED = 42
 IMAGE_SIZE = 128
 MAX_IMG = 4000
 
-import os
-print(os.environ.get("USERPROFILE"))
-
-
-# Configuration MLflow conditionnelle
 TESTING = os.environ.get('TESTING', 'False') == 'True'
-
-# if not TESTING:
-#     mlflow.set_tracking_uri(os.getenv('MLFLOW_TRACKING_URI', 'http://127.0.0.1:5001'))
-#     mlflow.set_experiment("feedback_experiment")
 
 if not TESTING:
     mlflow.set_tracking_uri("http://127.0.0.1:5001")
     mlflow.set_experiment("feedback_experiment_clean")
 
-# 📁 Forcer le dossier de stockage des artefacts (relatif à ton projet ou chemin absolu)
-ARTIFACT_ROOT = os.path.abspath("mlruns_artifacts")
-
-# 🧪 Nom de la nouvelle expérience
+# ARTIFACT_ROOT = os.path.abspath("mlruns_artifacts")
+ARTIFACT_ROOT = "file:///app/artifacts" 
 EXPERIMENT_NAME = "feedback_experiment_clean"
 
-# ✅ Crée l'expérience uniquement si elle n'existe pas
 try:
     experiment_id = mlflow.create_experiment(
         name=EXPERIMENT_NAME,
-        artifact_location=f"file:///{ARTIFACT_ROOT.replace(os.sep, '/')}"
+        artifact_location=ARTIFACT_ROOT
     )
     print(f"✅ Expérience créée : {EXPERIMENT_NAME}")
 except MlflowException:
@@ -65,25 +82,17 @@ except MlflowException:
     experiment_id = experiment.experiment_id
     print(f"⚠️ Expérience déjà existante : {EXPERIMENT_NAME}")
 
-# 📌 Appliquer cette expérience comme défaut
 mlflow.set_experiment(EXPERIMENT_NAME)
 
-
-
-
-
-app = Flask(__name__)
-app.secret_key = "une_clé_secrète_pour_session_et_flash"
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'votre_clé_secrète_par_défaut')
-
-# Modifier la configuration de la base de données
 if TESTING:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 else:
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
+    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////app/data/mlflow.db"
+
+
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-print("Base de données configurée :", app.config["SQLALCHEMY_DATABASE_URI"])
 
 db.init_app(app)
 migrate = Migrate(app, db)
@@ -91,20 +100,12 @@ migrate = Migrate(app, db)
 with app.app_context():
     db.create_all()
 
-# # Charger le modèle
-# MODEL_PATH = r"C:\Users\Francy\Documents\cat_and_dog_ko-main\models\model.keras"
-# # MODEL_PATH = os.path.join(os.getcwd(), "models", "model.keras")
-# Définir le chemin correct du modèle pour Docker
 MODEL_PATH = "models/model.keras"
-
-# Vérifier si le fichier existe avant de le charger
 if not os.path.exists(MODEL_PATH):
     raise FileNotFoundError(f"Le fichier modèle n'existe pas : {MODEL_PATH}")
 
-print(f"Chargement du modèle depuis : {MODEL_PATH}")
 model = load_model(MODEL_PATH)
 model.make_predict_function()
-
 
 def model_predict(img, model):
     if model is None:
@@ -124,7 +125,7 @@ def should_retrain_model(threshold=5):
 
 
 def retrain_model():
-    print("Réentraînement du modèle...")
+    logging.info("🔁 Début du réentraînement du modèle...")
     IMAGE_SIZE = 128
     data_dir = 'data/retraining'
 
@@ -143,7 +144,8 @@ def retrain_model():
                 X.append(img_array)
                 y.append(index_animal)
             except Exception as e:
-                print(f"Erreur lors du chargement de l'image {img_path}: {e}")
+                # print(f"Erreur lors du chargement de l'image {img_path}: {e}")
+                logging.error(f"Erreur lors du chargement de l'image {img_path}: {e}")
 
     # Conversion des listes en tableaux Numpy
     X = np.array(X)  # Forme (n_samples, 128, 128, 3)
@@ -162,15 +164,21 @@ def retrain_model():
     # Charger l'ancien modèle
     model = load_model(MODEL_PATH)
 
+    logging.info(f"🔁 Réentraînement déclenché - {len(X)} images utilisées (chat : {y.tolist().count(0)}, chien : {y.tolist().count(1)})")
+
     # Réentraîner le modèle avec les nouvelles données
     model.fit(X, y, epochs=5, batch_size=32)
 
     # Sauvegarder le modèle mis à jour
     model.save(MODEL_PATH)
     print(f"Modèle réentraîné et sauvegardé dans : {MODEL_PATH}")
+    logging.info("✅ Modèle réentraîné et sauvegardé avec succès.")
+
 
     # Créer une nouvelle version du modèle dans MLflow
-    with mlflow.start_run():
+    # with mlflow.start_run():
+    with mlflow.start_run(experiment_id=experiment_id):
+
         mlflow.keras.log_model(model, "model", registered_model_name="Model_for_User_Feedback")
         print("Modèle réentraîné sauvegardé dans MLflow.")
     mlflow.end_run()
@@ -178,9 +186,22 @@ def retrain_model():
 
 
 
+# def login_required(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         if 'user_id' not in session:
+#             flash('Veuillez vous connecter pour accéder à cette page.', 'error')
+#             return redirect(url_for('login'))
+#         return f(*args, **kwargs)
+#     return decorated_function
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Ne bloque pas les routes du dashboard
+        if request.path.startswith('/dashboard'):
+            return f(*args, **kwargs)
+
         if 'user_id' not in session:
             flash('Veuillez vous connecter pour accéder à cette page.', 'error')
             return redirect(url_for('login'))
@@ -275,6 +296,8 @@ def reject_prediction():
     # artifact_dir = os.path.join(os.getcwd(), "artifacts", "rejected_images")
     artifact_dir = os.path.join("artifacts", "rejected_images")
 
+    logging.warning(f"❌ Prédiction rejetée par l'utilisateur - Image : {user_input}, Prédiction : {model_output}, Attendu : {real_label}")
+
 
     try:
         print("📁 Création du dossier d’image:", os.path.dirname(image_path))
@@ -290,11 +313,10 @@ def reject_prediction():
         print("✅ Image sauvegardée:", image_path)
 
         print("🔗 Connexion à MLflow...")
-        # mlflow.set_tracking_uri("http://127.0.0.1:5001")
-        # # mlflow.set_tracking_uri("file:./artifacts")
-        # mlflow.set_experiment("feedback_experiment")
 
-        with mlflow.start_run():
+        # with mlflow.start_run():
+        with mlflow.start_run(experiment_id=experiment_id):
+
             mlflow.log_param("user_input", user_input)
             mlflow.log_param("model_output", model_output)
             mlflow.log_param("feedback", feedback)
@@ -302,10 +324,9 @@ def reject_prediction():
             mlflow.log_param("timestamp", timestamp.strftime("%Y-%m-%d %H:%M:%S"))
             print("📦 Enregistrement de l’image dans MLflow...")
             print("📸 image_path utilisé :", image_path)
-            # mlflow.log_artifact(image_path, artifact_path="rejected_images")
+
             mlflow.log_artifact(image_path, artifact_path="rejected_images")
-            # mlflow.log_artifact(image_path, artifact_path=os.path.join(os.getcwd(), "artifacts", "rejected_images"))
-            # mlflow.log_artifact(image_path, artifact_path="images")
+
 
 
             flash("Prédiction rejetée enregistrée.", "danger")
@@ -313,6 +334,8 @@ def reject_prediction():
 
     except Exception as e:
         print("❌ Erreur lors de l’enregistrement du rejet :", str(e))
+        logging.error(f"Erreur lors du traitement de rejet : {str(e)}")
+
         traceback.print_exc() 
         flash(f"Erreur MLflow : {e}", "error")
         return redirect(url_for("home"))
@@ -336,64 +359,6 @@ def reject_prediction():
     print("🔚 Fin de reject_prediction")
     return redirect(url_for("home"))
 
-# @app.route("/reject_prediction", methods=["POST"])
-# def reject_prediction():
-#     user_input = request.form.get("user_input")
-#     model_output = request.form.get("model_output")
-#     real_label = request.form.get("real_label")
-#     image_base64 = request.form.get("image_base64")
-
-#     if not user_input or not model_output or not real_label or not image_base64:
-#         flash("Erreur : Données manquantes.", "error")
-#         return redirect(url_for("home"))
-
-#     feedback = "rejected"
-#     timestamp = datetime.now()
-#     file_name = f"{timestamp.strftime('%Y%m%d_%H%M%S')}_{user_input}.jpg"
-#     image_path = os.path.join("data", "retraining", real_label, file_name)
-
-#     # 🔐 Créer le dossier s'il n'existe pas
-#     os.makedirs(os.path.dirname(image_path), exist_ok=True)
-
-#     # 🔐 Créer un dossier pour les artefacts si besoin
-#     os.makedirs("artifacts/rejected_images", exist_ok=True)
-
-#     # 🔄 Décoder et enregistrer l’image
-#     img_data = base64.b64decode(image_base64)
-#     with open(image_path, "wb") as f:
-#         f.write(img_data)
-
-#     # 🔗 S'assurer que le run est bien relié à MLflow Server
-#     mlflow.set_tracking_uri("http://127.0.0.1:5001")
-#     mlflow.set_experiment("feedback_experiment")
-
-#     with mlflow.start_run():
-#         mlflow.log_param("user_input", user_input)
-#         mlflow.log_param("model_output", model_output)
-#         mlflow.log_param("feedback", feedback)
-#         mlflow.log_param("real_label", real_label)
-#         mlflow.log_param("timestamp", timestamp.strftime("%Y-%m-%d %H:%M:%S"))
-#         # mlflow.log_artifact(image_path, artifact_path="rejected_images")
-#         mlflow.log_artifact(image_path, artifact_path=os.path.join(os.getcwd(), "artifacts", "rejected_images"))
-
-#         flash("Prédiction rejetée enregistrée.", "danger")
-
-#     # Enregistrer aussi dans la base locale
-#     new_feedback = Feedback(
-#         user_input=user_input,
-#         model_output=model_output,
-#         feedback=feedback,
-#         timestamp=timestamp,
-#     )
-#     db.session.add(new_feedback)
-#     db.session.commit()
-
-#     # Réentraîner si le seuil est atteint
-#     if should_retrain_model():
-#         retrain_model()
-#         flash("Modèle réentraîné avec succès!", "success")
-
-#     return redirect(url_for("home"))
 
 
 @app.route("/result", methods=["POST"])
@@ -417,6 +382,8 @@ def upload():
         mlflow.set_tag("Prediction Info", "Initial prediction for user-uploaded image")
     mlflow.end_run()
 
+    logging.info(f"🧠 Prédiction effectuée sur : {f.filename}, Résultat : {result}")
+
     return render_template(
         "result.html",
         result=result,
@@ -436,7 +403,9 @@ def validate_prediction():
     feedback = "validated"
     timestamp = datetime.now()
 
-    with mlflow.start_run():
+    # with mlflow.start_run():
+    with mlflow.start_run(experiment_id=experiment_id):
+
         mlflow.log_param("user_input", user_input)
         mlflow.log_param("model_output", model_output)
         mlflow.log_param("feedback", feedback)
@@ -453,6 +422,8 @@ def validate_prediction():
     db.session.add(new_feedback)
     db.session.commit()
 
+    logging.info(f"✅ Prédiction validée : {user_input}, classe prédite : {model_output}")
+    
     return redirect(url_for("home"))
 
 
@@ -460,6 +431,8 @@ def validate_prediction():
 
 if __name__ == "__main__":
     # app.run(debug=True)
+    logging.info("🟢 Serveur Flask lancé (port 5000)")
+
     app.run(host="0.0.0.0", port=5000, debug=True)
 
 

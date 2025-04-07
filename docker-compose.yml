@@ -3,23 +3,23 @@ version: '3.8'
 services:
   app:
     build: .
+    user: "1000:1000"  # 👈 Ajout ici 
     ports:
       - "5000:5000"
       - "5001:5001"
     volumes:
-      - app-data:/app/data
+      - "C:/Users/Francy/Documents/cat_and_dog_ko-main/data:/app/data"  # 👈 Montre le dossier instance local dans le conteneur         
       - app-artifacts:/app/artifacts
     environment:
       - FLASK_APP=app.py
       - FLASK_RUN_HOST=0.0.0.0
       - FLASK_ENV=production
-      - DATABASE_PATH=/app/data/mlflow.db
       - MLFLOW_TRACKING_URI=http://127.0.0.1:5001
+    working_dir: /app
     command: >
-      sh -c "mlflow server --backend-store-uri sqlite:////app/data/mlflow.db
-      --default-artifact-root /app/artifacts
+      sh -c "mlflow server --backend-store-uri sqlite:////app/instance/mlflow.db \
+      --default-artifact-root /app/artifacts \
       --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"
 
 volumes:
-  app-data:
   app-artifacts:
