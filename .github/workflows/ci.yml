@@ -35,8 +35,23 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install setuptools wheel
-          pip install pytest
+          # Installer toutes les dépendances principales
+          pip install -r requirements.txt
+          # Installer les dépendances de test
           pip install -r requirements-test.txt
+          # S'assurer que flask_sqlalchemy est installé
+          pip install flask_sqlalchemy flask_migrate
+
+      - name: Create dummy model file
+        run: |
+          python -c "
+          import os
+          import numpy as np
+          # Créer un fichier factice à la place du modèle Keras
+          with open('models/model.keras', 'wb') as f:
+              f.write(np.random.bytes(1024))
+          print('Fichier modèle factice créé avec succès')
+          "
 
       - name: Run unit tests
         run: |
