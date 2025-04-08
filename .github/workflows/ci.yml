@@ -114,7 +114,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4  # Mise à jour de v3 à v4
         with:
           name: test-logs
           path: |
