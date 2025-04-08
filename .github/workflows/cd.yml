@@ -3,7 +3,7 @@ name: Continuous Deployment
 on:
   push:
     branches:
-      - ken
+      - main
   pull_request:
     branches:
       - main

@@ -41,13 +41,15 @@ jobs:
       - name: Install Chrome & ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 libgl1-mesa-glx
+          # Installer les dépendances compatibles avec Ubuntu 24.04
+          sudo apt-get install -y wget unzip xvfb libxi6 libgl1 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
           
-          # Install Chrome
+          # Installation de Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
           sudo apt install -y ./google-chrome-stable_current_amd64.deb
           
-          # Install ChromeDriver
+          # Installation de ChromeDriver
           CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
           CHROMEDRIVER_VERSION=$(wget -q -O - "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
           wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
@@ -55,7 +57,7 @@ jobs:
           sudo mv chromedriver /usr/local/bin/
           sudo chmod +x /usr/local/bin/chromedriver
           
-          # Verify installation
+          # Vérifier l'installation
           google-chrome --version
           chromedriver --version
 
