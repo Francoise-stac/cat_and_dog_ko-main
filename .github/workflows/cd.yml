@@ -22,7 +22,7 @@ jobs:
           port: 22
           command_timeout: 20m
           script_stop: true
-          proxy_timeout: 30s
+          timeout: 60s
           script: |
             echo "Connection test successful"
             whoami
@@ -49,35 +49,73 @@ jobs:
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
             
             echo "Vérification des conteneurs existants..."
-            docker ps -a | grep cat-dog-app || echo "Aucun conteneur existant trouvé"
+            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
+              echo "Conteneur existant trouvé, obtention des détails..."
+              docker ps -a | grep cat-dog-app || true
+            else
+              echo "Aucun conteneur existant trouvé"
+            fi
             
-            echo "Arrêt et suppression des anciens conteneurs..."
-            # S'assurer que le conteneur est arrêté et supprimé, même s'il est en cours d'exécution
-            docker stop cat-dog-app || echo "Aucun conteneur à arrêter"
-            docker rm -f cat-dog-app || echo "Aucun conteneur à supprimer"
+            echo "Attente de 10 secondes pour assurer que les processus Docker sont terminés..."
+            sleep 10
             
-            # Vérification supplémentaire qu'aucun conteneur n'existe avec ce nom
-            if docker ps -a --format "{{.Names}}" | grep -q "^cat-dog-app$"; then
-              echo "Suppression forcée du conteneur qui persiste..."
-              docker rm -f cat-dog-app
+            echo "Arrêt et suppression des anciens conteneurs avec des tentatives multiples..."
+            # Première tentative
+            docker stop cat-dog-app 2>/dev/null || echo "Aucun conteneur en cours d'exécution à arrêter"
+            sleep 2
+            docker rm -f cat-dog-app 2>/dev/null || echo "Première tentative: Aucun conteneur à supprimer"
+            
+            # Deuxième tentative
+            sleep 5
+            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
+              echo "Le conteneur persiste, deuxième tentative de suppression..."
+              docker kill cat-dog-app 2>/dev/null || echo "Impossible de tuer le conteneur"
+              sleep 2
+              docker rm -f cat-dog-app 2>/dev/null || echo "Deuxième tentative: Impossible de supprimer le conteneur"
+            fi
+            
+            # Troisième tentative avec nettoyage complet
+            sleep 5
+            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
+              echo "Le conteneur persiste toujours, tentative finale avec nettoyage système..."
+              
+              # Obtenir l'ID du conteneur
+              CONTAINER_ID=$(docker ps -a --filter "name=cat-dog-app" --format "{{.ID}}")
+              echo "ID du conteneur: $CONTAINER_ID"
+              
+              # Tentative avec prune
+              docker container prune -f
+              
+              # Suppression forcée avec options avancées
+              docker rm -f $CONTAINER_ID 2>/dev/null || echo "Impossible de supprimer le conteneur par ID"
+            fi
+            
+            # Vérification finale
+            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
+              echo "ÉCHEC: Impossible de supprimer le conteneur persistant. Utilisation d'un nom de conteneur différent..."
+              CONTAINER_NAME="cat-dog-app-$(date +%s)"
+              echo "Nouveau nom de conteneur: $CONTAINER_NAME"
+            else
+              echo "Conteneur supprimé avec succès"
+              CONTAINER_NAME="cat-dog-app"
             fi
             
             echo "Pulling new image..."
             docker pull fdjeumen/cat_and_dog_ko-main-app:latest
             
-            echo "Starting new container..."
+            echo "Démarrage du nouveau conteneur avec le nom: $CONTAINER_NAME..."
             docker run -d \
-              --name cat-dog-app \
+              --name $CONTAINER_NAME \
               -p 5000:5000 \
               -p 5001:5001 \
               --restart unless-stopped \
               fdjeumen/cat_and_dog_ko-main-app:latest
             
             echo "Vérification que le conteneur est bien démarré..."
-            docker ps | grep cat-dog-app
+            docker ps | grep $CONTAINER_NAME
             
             echo "Attente de 5 secondes pour laisser l'application démarrer..."
             sleep 5
             
             echo "Logs du conteneur pour vérification:"
-            docker logs --tail 20 cat-dog-app
+            docker logs --tail 20 $CONTAINER_NAME

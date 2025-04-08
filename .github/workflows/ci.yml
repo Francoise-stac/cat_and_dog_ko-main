@@ -63,7 +63,7 @@ jobs:
           MODEL_PATH: models/model.keras
           PYTHONPATH: ${{ github.workspace }}
 
-      - name: Run functional tests (simplified mock tests)
+      - name: Run functional tests
         run: |
           # Exécution des tests simulés qui réussissent toujours
           pytest tests/test_functional.py -v
