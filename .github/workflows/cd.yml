@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Check connection to server
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -23,15 +23,13 @@ jobs:
           command_timeout: 20m
           script_stop: true
           proxy_timeout: 30s
-          proxy_key_exchange_algorithms: curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
-          proxy_host_key_algorithms: ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-dss
           script: |
             echo "Connection test successful"
             whoami
             uname -a
 
       - name: Deploy and Run Docker Container
-        uses: appleboy/ssh-action@v0.1.10  # Version spécifique au lieu de master
+        uses: appleboy/ssh-action@v0.1.10
         if: success()
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -40,9 +38,7 @@ jobs:
           port: 22
           command_timeout: 20m
           script_stop: true
-          proxy_timeout: 30s
-          proxy_key_exchange_algorithms: curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
-          proxy_host_key_algorithms: ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-dss
+          timeout: 60s
           script: |
             set -e
             echo "Logging into Docker Hub on the remote server..."
@@ -56,8 +52,15 @@ jobs:
             docker ps -a | grep cat-dog-app || echo "Aucun conteneur existant trouvé"
             
             echo "Arrêt et suppression des anciens conteneurs..."
-            docker stop cat-dog-app 2>/dev/null || echo "Aucun conteneur à arrêter"
-            docker rm cat-dog-app 2>/dev/null || echo "Aucun conteneur à supprimer"
+            # S'assurer que le conteneur est arrêté et supprimé, même s'il est en cours d'exécution
+            docker stop cat-dog-app || echo "Aucun conteneur à arrêter"
+            docker rm -f cat-dog-app || echo "Aucun conteneur à supprimer"
+            
+            # Vérification supplémentaire qu'aucun conteneur n'existe avec ce nom
+            if docker ps -a --format "{{.Names}}" | grep -q "^cat-dog-app$"; then
+              echo "Suppression forcée du conteneur qui persiste..."
+              docker rm -f cat-dog-app
+            fi
             
             echo "Pulling new image..."
             docker pull fdjeumen/cat_and_dog_ko-main-app:latest
