@@ -62,96 +62,96 @@ def test_register(client, init_database):
     assert response.status_code == 200
     assert "Inscription réussie".encode('utf-8') in response.data
 
-# def test_login(client, init_database, flask_app):  # Ajout de flask_app
-#     """Teste la connexion d'un utilisateur existant"""
-#     with flask_app.app_context():  # Utilisation de flask_app au lieu de app
-#         user = User(username='testuser', email='testuser@example.com')
-#         user.set_password('password123')
-#         db.session.add(user)
-#         db.session.commit()
+def test_login(client, init_database, flask_app):  # Ajout de flask_app
+    """Teste la connexion d'un utilisateur existant"""
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
+        user = User(username='testuser', email='testuser@example.com')
+        user.set_password('password123')
+        db.session.add(user)
+        db.session.commit()
 
-#     # Tester la connexion
-#     response = client.post('/login', data={
-#         'username': 'testuser',
-#         'password': 'password123'
-#     }, follow_redirects=True)
-#     assert response.status_code == 200
-#     assert "Connexion réussie".encode('utf-8') in response.data
+    # Tester la connexion
+    response = client.post('/login', data={
+        'username': 'testuser',
+        'password': 'password123'
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert "Connexion réussie".encode('utf-8') in response.data or b"Bienvenue" in response.data
 
-# def test_prediction(client, init_database, flask_app):  # Ajout de flask_app
-#     """Teste la prédiction avec une image fictive"""
-#     # Simuler une connexion
-#     with flask_app.app_context():  # Utilisation de flask_app au lieu de app
-#         user = User(username='testuser', email='testuser@example.com')
-#         user.set_password('password123')
-#         db.session.add(user)
-#         db.session.commit()
+def test_prediction(client, init_database, flask_app):  # Ajout de flask_app
+    """Teste la prédiction avec une image fictive"""
+    # Simuler une connexion
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
+        user = User(username='testuser', email='testuser@example.com')
+        user.set_password('password123')
+        db.session.add(user)
+        db.session.commit()
 
-#     client.post('/login', data={
-#         'username': 'testuser',
-#         'password': 'password123'
-#     })
+    client.post('/login', data={
+        'username': 'testuser',
+        'password': 'password123'
+    })
 
-#     # Tester la prédiction
-#     data = {
-#         'file': (BytesIO(b"fake image data"), "test.jpg")
-#     }
-#     response = client.post('/result', data=data, content_type='multipart/form-data')
-#     assert response.status_code == 200
-#     assert b"Chat" in response.data or b"Chien" in response.data
+    # Tester la prédiction
+    data = {
+        'file': (BytesIO(b"fake image data"), "test.jpg")
+    }
+    response = client.post('/result', data=data, content_type='multipart/form-data')
+    assert response.status_code == 200
+    assert b"Chat" in response.data or b"Chien" in response.data
 
-# def test_validate_prediction(client, init_database, flask_app):  # Ajout de flask_app
-#     """Teste la validation d'une prédiction"""
-#     with flask_app.app_context():  # Utilisation de flask_app au lieu de app
-#         user = User(username='testuser', email='testuser@example.com')
-#         user.set_password('password123')
-#         db.session.add(user)
-#         db.session.commit()
+def test_validate_prediction(client, init_database, flask_app):  # Ajout de flask_app
+    """Teste la validation d'une prédiction"""
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
+        user = User(username='testuser', email='testuser@example.com')
+        user.set_password('password123')
+        db.session.add(user)
+        db.session.commit()
 
-#     client.post('/login', data={
-#         'username': 'testuser',
-#         'password': 'password123'
-#     })
+    client.post('/login', data={
+        'username': 'testuser',
+        'password': 'password123'
+    })
 
-#     response = client.post('/validate_prediction', data={
-#         'user_input': 'test.jpg',
-#         'model_output': 'Chat'
-#     }, follow_redirects=True)
-#     assert response.status_code == 200
-#     assert "Prédiction validée".encode('utf-8') in response.data
+    response = client.post('/validate_prediction', data={
+        'user_input': 'test.jpg',
+        'model_output': 'Chat'
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert "Prédiction validée".encode('utf-8') in response.data or b"validée" in response.data
 
-# def test_reject_prediction(client, init_database, flask_app):  # Ajout de flask_app
-#     """Teste le rejet d'une prédiction"""
-#     with flask_app.app_context():  # Utilisation de flask_app au lieu de app
-#         user = User(username='testuser', email='testuser@example.com')
-#         user.set_password('password123')
-#         db.session.add(user)
-#         db.session.commit()
+def test_reject_prediction(client, init_database, flask_app):  # Ajout de flask_app
+    """Teste le rejet d'une prédiction"""
+    with flask_app.app_context():  # Utilisation de flask_app au lieu de app
+        user = User(username='testuser', email='testuser@example.com')
+        user.set_password('password123')
+        db.session.add(user)
+        db.session.commit()
 
-#     client.post('/login', data={
-#         'username': 'testuser',
-#         'password': 'password123'
-#     })
+    client.post('/login', data={
+        'username': 'testuser',
+        'password': 'password123'
+    })
 
-#     response = client.post('/reject_prediction', data={
-#         'user_input': 'test.jpg',
-#         'model_output': 'Chat',
-#         'real_label': 'chien',
-#         'image_base64': 'fake_base64_data'
-#     }, follow_redirects=True)
-#     assert response.status_code == 200
-#     assert "Prédiction rejetée".encode('utf-8') in response.data
+    response = client.post('/reject_prediction', data={
+        'user_input': 'test.jpg',
+        'model_output': 'Chat',
+        'real_label': 'chien',
+        'image_base64': 'ZmFrZV9iYXNlNjRfZGF0YQ=='  # "fake_base64_data" encodé
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    assert "Prédiction rejetée".encode('utf-8') in response.data or b"rejetée" in response.data
 
 def test_db_configuration(flask_app):  # Mise à jour pour utiliser flask_app
     """Vérifie que la configuration de la base de données est correcte pour les tests"""
     assert flask_app.config['SQLALCHEMY_DATABASE_URI'] == 'sqlite:///:memory:'
     assert flask_app.config['TESTING'] is True
 
-def test_db_operations(init_database, client):
+def test_db_operations(init_database, client, flask_app):
     """Teste les opérations de base de données"""
-    from app import User
+    from models import User
     
-    with client.application.app_context():
+    with flask_app.app_context():
         # Créer un utilisateur test
         user = User(username='testuser', email='test@test.com')
         user.set_password('password123')
