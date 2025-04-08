@@ -38,17 +38,6 @@ jobs:
           pip install pytest
           pip install -r requirements-test.txt
 
-      - name: Create dummy model file
-        run: |
-          python -c "
-          import os
-          import numpy as np
-          # Créer un fichier factice à la place du modèle Keras
-          with open('models/model.keras', 'wb') as f:
-              f.write(np.random.bytes(1024))
-          print('Fichier modèle factice créé avec succès')
-          "
-
       - name: Run unit tests
         run: |
           pytest test_app.py -v
