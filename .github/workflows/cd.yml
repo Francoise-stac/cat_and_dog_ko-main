@@ -36,7 +36,7 @@ jobs:
             docker rm cat-dog-app || true
             
             echo "Pulling new image..."
-            docker pull gessyken/cat-dog-app:latest
+            docker pull fdjeumen/cat_and_dog_ko-main-app:latest
             
             echo "Starting new container..."
             docker run -d \
@@ -44,7 +44,7 @@ jobs:
               -p 5000:5000 \
               -p 5001:5001 \
               --restart unless-stopped \
-              gessyken/cat-dog-app:latest
+              fdjeumen/cat_and_dog_ko-main-app:latest
 
             
       # - name: Setup SSH
