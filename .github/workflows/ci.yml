@@ -38,16 +38,31 @@ jobs:
           mkdir -p models
           mkdir -p tests/test_data
 
-      - name: Install system dependencies
+      - name: Install Chrome & ChromeDriver
         run: |
           sudo apt-get update
-          sudo apt-get install -y chromium-browser chromium-chromedriver
-          sudo apt-get install -y libgl1-mesa-glx
-          pip install --upgrade pip
-          pip install setuptools wheel
+          sudo apt-get install -y wget unzip xvfb libxi6 libgconf-2-4 libgl1-mesa-glx
+          
+          # Install Chrome
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install -y ./google-chrome-stable_current_amd64.deb
+          
+          # Install ChromeDriver
+          CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d. -f1)
+          CHROMEDRIVER_VERSION=$(wget -q -O - "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
+          wget "https://chromedriver.storage.googleapis.com/${CHROMEDRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver_linux64.zip
+          sudo mv chromedriver /usr/local/bin/
+          sudo chmod +x /usr/local/bin/chromedriver
+          
+          # Verify installation
+          google-chrome --version
+          chromedriver --version
 
       - name: Install Python dependencies
         run: |
+          pip install --upgrade pip
+          pip install setuptools wheel
           pip install tensorflow
           pip install -r requirements.txt
           pip install -r requirements-test.txt
@@ -103,7 +118,7 @@ jobs:
 
       - name: Run functional tests
         run: |
-          pytest tests/test_functional.py -v --driver Chrome --driver-path /usr/bin/chromedriver
+          pytest tests/test_functional.py -v --driver Chrome
         env:
           PYTHONPATH: ${{ github.workspace }}
           TESTING: 'True'
@@ -114,7 +129,7 @@ jobs:
 
       - name: Upload test logs
         if: always()
-        uses: actions/upload-artifact@v4  # Mise à jour de v3 à v4
+        uses: actions/upload-artifact@v4
         with:
           name: test-logs
           path: |
