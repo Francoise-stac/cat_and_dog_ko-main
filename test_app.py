@@ -118,7 +118,7 @@ def test_validate_prediction(client, init_database, flask_app):  # Ajout de flas
         'model_output': 'Chat'
     }, follow_redirects=True)
     assert response.status_code == 200
-    assert "Prédiction validée".encode('utf-8') in response.data or b"validée" in response.data
+    assert "Prédiction validée".encode('utf-8') in response.data or b"validee" in response.data
 
 def test_reject_prediction(client, init_database, flask_app):  # Ajout de flask_app
     """Teste le rejet d'une prédiction"""
@@ -140,7 +140,7 @@ def test_reject_prediction(client, init_database, flask_app):  # Ajout de flask_
         'image_base64': 'ZmFrZV9iYXNlNjRfZGF0YQ=='  # "fake_base64_data" encodé
     }, follow_redirects=True)
     assert response.status_code == 200
-    assert "Prédiction rejetée".encode('utf-8') in response.data or b"rejetée" in response.data
+    assert "Prédiction rejetée".encode('utf-8') in response.data or b"rejetee" in response.data
 
 def test_db_configuration(flask_app):  # Mise à jour pour utiliser flask_app
     """Vérifie que la configuration de la base de données est correcte pour les tests"""
