@@ -13,27 +13,51 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy and Run Docker Container
+      - name: Check connection to server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           port: 22
+          command_timeout: 20m
+          script_stop: true
+          proxy_timeout: 30s
+          proxy_key_exchange_algorithms: curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+          proxy_host_key_algorithms: ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-dss
           script: |
-            # echo "hello world"
+            echo "Connection test successful"
+            whoami
+            uname -a
+
+      - name: Deploy and Run Docker Container
+        uses: appleboy/ssh-action@v0.1.10  # Version spécifique au lieu de master
+        if: success()
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 22
+          command_timeout: 20m
+          script_stop: true
+          proxy_timeout: 30s
+          proxy_key_exchange_algorithms: curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group16-sha512,diffie-hellman-group18-sha512
+          proxy_host_key_algorithms: ssh-ed25519,ssh-rsa,rsa-sha2-256,rsa-sha2-512,ecdsa-sha2-nistp256,ecdsa-sha2-nistp384,ecdsa-sha2-nistp521,ssh-dss
+          script: |
             set -e
             echo "Logging into Docker Hub on the remote server..."
 
+            # Pour éviter que le mot de passe soit visible dans les logs
+            echo "Docker login..."
+            docker logout
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-            # echo "Testing connection..."
-            # whoami
-            # docker info
             
-            echo "Manipulating containers..."
-            docker stop cat-dog-app || true
-            docker rm cat-dog-app || true
+            echo "Vérification des conteneurs existants..."
+            docker ps -a | grep cat-dog-app || echo "Aucun conteneur existant trouvé"
+            
+            echo "Arrêt et suppression des anciens conteneurs..."
+            docker stop cat-dog-app 2>/dev/null || echo "Aucun conteneur à arrêter"
+            docker rm cat-dog-app 2>/dev/null || echo "Aucun conteneur à supprimer"
             
             echo "Pulling new image..."
             docker pull fdjeumen/cat_and_dog_ko-main-app:latest
@@ -45,40 +69,12 @@ jobs:
               -p 5001:5001 \
               --restart unless-stopped \
               fdjeumen/cat_and_dog_ko-main-app:latest
-
             
-      # - name: Setup SSH
-      #   run: |
-      #     mkdir -p ~/.ssh
-      #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-      #     chmod 600 ~/.ssh/id_rsa
-      #     eval $(ssh-agent -s)
-      #     ssh-add ~/.ssh/id_rsa
-      #     ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
-
-      # - name: Deploy to Server
-      #   env:
-      #     SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      #     DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
-      #   run: |
-      #     ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa deploy@${SERVER_HOST} '
-      #       set -e
-      #       echo "Testing connection..."
-      #       whoami
-      #       docker info
+            echo "Vérification que le conteneur est bien démarré..."
+            docker ps | grep cat-dog-app
             
-      #       echo "Manipulating containers..."
-      #       docker stop cat-dog-app || true
-      #       docker rm cat-dog-app || true
+            echo "Attente de 5 secondes pour laisser l'application démarrer..."
+            sleep 5
             
-      #       echo "Pulling new image..."
-      #       docker pull '"${{ secrets.DOCKER_USERNAME }}"'/cat-dog-app:latest
-            
-      #       echo "Starting new container..."
-      #       docker run -d \
-      #         --name cat-dog-app \
-      #         -p 5000:5000 \
-      #         -p 5001:5001 \
-      #         --restart unless-stopped \
-      #         '"${{ secrets.DOCKER_USERNAME }}"'/cat-dog-app:latest
-      #     '
+            echo "Logs du conteneur pour vérification:"
+            docker logs --tail 20 cat-dog-app

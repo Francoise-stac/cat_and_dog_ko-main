@@ -43,7 +43,7 @@ jobs:
           sudo apt-get update
           # Installer les dépendances compatibles avec Ubuntu 24.04
           sudo apt-get install -y wget unzip xvfb libxi6 libgl1 libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
-            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2
+            libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 libasound2t64
           
           # Installation de Chrome
           wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
