@@ -745,3 +745,91 @@
 2025-04-07 16:36:25,708 - INFO - \U0001f680 Application démarrée.
 2025-04-07 16:36:26,753 - INFO - Scheduler has been shut down
 2025-04-07 16:36:28,559 - INFO - Scheduler has been shut down
+2025-04-10 21:49:00,740 - INFO - \U0001f680 Application démarrée.
+2025-04-10 21:49:01,901 - INFO - Scheduler has been shut down
+2025-04-10 22:01:39,826 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:01:40,038 - INFO - Scheduler has been shut down
+2025-04-10 22:06:47,976 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:06:48,083 - INFO - Scheduler has been shut down
+2025-04-10 22:07:44,715 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:07:44,822 - INFO - Scheduler has been shut down
+2025-04-10 22:18:26,930 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:18:29,434 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 22:18:30,486 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.22:5000
+2025-04-10 22:18:30,486 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-10 22:18:30,502 - INFO -  * Restarting with stat
+2025-04-10 22:18:39,331 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:18:39,655 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 22:18:39,667 - WARNING -  * Debugger is active!
+2025-04-10 22:18:39,675 - INFO -  * Debugger PIN: 834-562-467
+2025-04-10 22:20:35,947 - INFO - 127.0.0.1 - - [10/Apr/2025 22:20:35] "GET / HTTP/1.1" 200 -
+2025-04-10 22:20:36,024 - INFO - 127.0.0.1 - - [10/Apr/2025 22:20:36] "[33mGET /static/img/upload.svg HTTP/1.1[0m" 404 -
+2025-04-10 22:20:36,286 - INFO - 127.0.0.1 - - [10/Apr/2025 22:20:36] "GET /static/css/main.css HTTP/1.1" 200 -
+2025-04-10 22:24:51,426 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:24:51,658 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 22:24:52,511 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.22:5000
+2025-04-10 22:24:52,511 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-10 22:24:52,513 - INFO -  * Restarting with stat
+2025-04-10 22:25:03,509 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:25:03,948 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 22:25:03,957 - WARNING -  * Debugger is active!
+2025-04-10 22:25:03,967 - INFO -  * Debugger PIN: 834-562-467
+2025-04-10 22:46:28,204 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:28] "GET /login HTTP/1.1" 200 -
+2025-04-10 22:46:28,294 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:28] "GET /static/css/main.css HTTP/1.1" 200 -
+2025-04-10 22:46:28,949 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:28] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-04-10 22:46:35,766 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:35] "[32mGET /logout HTTP/1.1[0m" 302 -
+2025-04-10 22:46:35,772 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:35] "GET /login HTTP/1.1" 200 -
+2025-04-10 22:46:35,828 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:35] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:46:37,479 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:37] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-04-10 22:46:37,486 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:37] "GET /login HTTP/1.1" 200 -
+2025-04-10 22:46:37,578 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:37] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:46:51,236 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:51] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-04-10 22:46:51,242 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:51] "GET /login HTTP/1.1" 200 -
+2025-04-10 22:46:51,300 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:51] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:46:54,044 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:54] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-04-10 22:46:54,061 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:54] "GET /login HTTP/1.1" 200 -
+2025-04-10 22:46:54,125 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:54] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:46:59,414 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:59] "GET /register HTTP/1.1" 200 -
+2025-04-10 22:46:59,450 - INFO - 127.0.0.1 - - [10/Apr/2025 22:46:59] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:47:02,863 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:02] "POST /register HTTP/1.1" 200 -
+2025-04-10 22:47:02,913 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:02] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:47:12,422 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:12] "[32mPOST /register HTTP/1.1[0m" 302 -
+2025-04-10 22:47:12,428 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:12] "GET /login HTTP/1.1" 200 -
+2025-04-10 22:47:12,476 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:12] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:47:15,917 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:15] "[32mPOST /login HTTP/1.1[0m" 302 -
+2025-04-10 22:47:15,950 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:15] "GET / HTTP/1.1" 200 -
+2025-04-10 22:47:16,054 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:16] "[33mGET /static/img/upload.svg HTTP/1.1[0m" 404 -
+2025-04-10 22:47:16,064 - INFO - 127.0.0.1 - - [10/Apr/2025 22:47:16] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 22:49:55,209 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\app.py', reloading
+2025-04-10 22:49:55,236 - INFO - Scheduler has been shut down
+2025-04-10 22:49:55,487 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\app.py', reloading
+2025-04-10 22:49:55,488 - INFO - Scheduler has been shut down
+2025-04-10 22:49:56,339 - INFO -  * Restarting with stat
+2025-04-10 22:49:56,414 - INFO -  * Restarting with stat
+2025-04-10 22:50:14,112 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:50:14,130 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:50:14,520 - INFO - Scheduler has been shut down
+2025-04-10 22:50:14,536 - INFO - Scheduler has been shut down
+2025-04-10 22:50:15,632 - INFO - Scheduler has been shut down
+2025-04-10 22:50:15,660 - INFO - Scheduler has been shut down
+2025-04-10 22:50:54,481 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:50:54,752 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 22:50:55,620 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.22:5000
+2025-04-10 22:50:55,620 - INFO - [33mPress CTRL+C to quit[0m
+2025-04-10 22:50:55,622 - INFO -  * Restarting with stat
+2025-04-10 22:51:04,405 - INFO - \U0001f680 Application démarrée.
+2025-04-10 22:51:04,631 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 22:51:04,640 - WARNING -  * Debugger is active!
+2025-04-10 22:51:04,647 - INFO -  * Debugger PIN: 834-562-467
+2025-04-10 22:51:08,861 - INFO - 127.0.0.1 - - [10/Apr/2025 22:51:08] "GET / HTTP/1.1" 200 -
+2025-04-10 22:51:08,989 - INFO - 127.0.0.1 - - [10/Apr/2025 22:51:08] "[33mGET /static/img/upload.svg HTTP/1.1[0m" 404 -
+2025-04-10 22:51:09,055 - INFO - 127.0.0.1 - - [10/Apr/2025 22:51:09] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -

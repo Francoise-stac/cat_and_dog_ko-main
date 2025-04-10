@@ -15,11 +15,12 @@ services:
       - FLASK_RUN_HOST=0.0.0.0
       - FLASK_ENV=production
       - MLFLOW_TRACKING_URI=http://127.0.0.1:5001
+      - DOCKER=true   
     working_dir: /app
     command: >
-      sh -c "mlflow server --backend-store-uri sqlite:////app/instance/mlflow.db \
-      --default-artifact-root /app/artifacts \
-      --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"
+      sh -c "mlflow server --backend-store-uri sqlite:////app/data/mlflow.db \
+            --default-artifact-root /app/artifacts \
+            --host 0.0.0.0 --port 5001 & sleep 5 && python app.py"
 
 volumes:
   app-artifacts:

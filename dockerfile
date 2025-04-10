@@ -70,8 +70,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY . .
 
 # Create required folders and set permissions
-RUN mkdir -p /app/artifacts /app/logs /app/instance /app/models && \
-    chown -R 1000:1000 /app/artifacts /app/logs /app/instance /app/models
+RUN mkdir -p /app/artifacts /app/logs /app/instance /app/models /app/data && \
+    chown -R 1000:1000 /app/artifacts /app/logs /app/instance /app/models /app/data
+RUN mkdir -p /app/data && chown -R 1000:1000 /app/data
 RUN mkdir -p /app/mlruns_artifacts && \
     chown -R 1000:1000 /app/mlruns_artifacts
 

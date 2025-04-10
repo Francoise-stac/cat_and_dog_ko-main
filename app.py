@@ -64,7 +64,8 @@ MAX_IMG = 4000
 TESTING = os.environ.get('TESTING', 'False') == 'True'
 
 if not TESTING:
-    mlflow.set_tracking_uri("http://127.0.0.1:5001")
+    mlflow.set_tracking_uri("http://127.0.0.1:5001")  #mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./artifacts --host 127.0.0.1 --port 5001
+
     mlflow.set_experiment("feedback_experiment_clean")
 
 # ARTIFACT_ROOT = os.path.abspath("mlruns_artifacts")
@@ -84,11 +85,22 @@ except MlflowException:
 
 mlflow.set_experiment(EXPERIMENT_NAME)
 
+
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+TESTING = os.environ.get('TESTING', 'False') == 'True'
+
 if TESTING:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 else:
-    # app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///mlflow.db"
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////app/data/mlflow.db"
+    if os.environ.get("DOCKER", "false").lower() == "true":
+        # En Docker (tu peux aussi utiliser un autre indicateur)
+        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////app/data/mlflow.db"
+    else:
+        # En local
+        db_path = os.path.join(BASE_DIR, "data", "mlflow.db")
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{db_path}"
+
 
 
 
