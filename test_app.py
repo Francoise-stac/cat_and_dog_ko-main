@@ -17,7 +17,7 @@ class TestSimulatedApp:
     def test_app_register(self):
         new_user_data = {"username": "newuser", "email": "user@example.com", "password": "secure123"}
         
-        with patch("app.auth.register_user") as mock_register:
+        with patch("auth.register_user") as mock_register:
             mock_register.return_value = {"success": True, "user_id": 123, "message": "Inscription réussie"}
             result = mock_register(new_user_data)
             
@@ -28,7 +28,7 @@ class TestSimulatedApp:
     def test_app_login(self):
         credentials = {"username": "existing_user", "password": "password123"}
         
-        with patch("app.auth.authenticate_user") as mock_auth:
+        with patch("auth.authenticate_user") as mock_auth:
             mock_auth.return_value = {"success": True, "token": "jwt_token_xyz", "user_id": 123}
             result = mock_auth(credentials)
             
@@ -39,7 +39,7 @@ class TestSimulatedApp:
     def test_app_prediction(self):
         fake_image_data = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
         
-        with patch("app.model.predict") as mock_predict:
+        with patch("model.predict") as mock_predict:
             mock_predict.return_value = {
                 "class": "cat",
                 "probability": 0.87,
@@ -55,14 +55,14 @@ class TestSimulatedApp:
     def test_app_database(self):
         prediction_data = {"image_id": 456, "result": "dog", "confidence": 0.95}
         
-        with patch("app.database.save_prediction") as mock_save:
+        with patch("database.save_prediction") as mock_save:
             mock_save.return_value = {"status": "success", "record_id": 789}
             result = mock_save(user_id=123, prediction=prediction_data)
             
             assert result["status"] == "success"
             assert isinstance(result["record_id"], int)
             
-        with patch("app.database.get_user_predictions") as mock_get:
+        with patch("database.get_user_predictions") as mock_get:
             mock_get.return_value = [
                 {"id": 1, "result": "cat", "timestamp": "2023-01-01T12:00:00"},
                 {"id": 2, "result": "dog", "timestamp": "2023-01-02T14:30:00"}

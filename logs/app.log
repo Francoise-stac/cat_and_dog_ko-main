@@ -833,3 +833,20 @@
 2025-04-10 22:51:08,861 - INFO - 127.0.0.1 - - [10/Apr/2025 22:51:08] "GET / HTTP/1.1" 200 -
 2025-04-10 22:51:08,989 - INFO - 127.0.0.1 - - [10/Apr/2025 22:51:08] "[33mGET /static/img/upload.svg HTTP/1.1[0m" 404 -
 2025-04-10 22:51:09,055 - INFO - 127.0.0.1 - - [10/Apr/2025 22:51:09] "[36mGET /static/css/main.css HTTP/1.1[0m" 304 -
+2025-04-10 23:17:46,196 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\test_app.py', reloading
+2025-04-10 23:17:46,197 - INFO - Scheduler has been shut down
+2025-04-10 23:17:47,028 - INFO -  * Restarting with stat
+2025-04-10 23:17:56,866 - INFO - \U0001f680 Application démarrée.
+2025-04-10 23:17:57,184 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 23:17:57,194 - WARNING -  * Debugger is active!
+2025-04-10 23:17:57,202 - INFO -  * Debugger PIN: 834-562-467
+2025-04-10 23:18:18,763 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\test_app.py', reloading
+2025-04-10 23:18:18,763 - INFO - Scheduler has been shut down
+2025-04-10 23:18:19,628 - INFO -  * Restarting with stat
+2025-04-10 23:18:28,774 - INFO - \U0001f680 Application démarrée.
+2025-04-10 23:18:29,032 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 23:18:29,039 - WARNING -  * Debugger is active!
+2025-04-10 23:18:29,046 - INFO -  * Debugger PIN: 834-562-467
+2025-04-10 23:18:39,948 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\test_app.py', reloading
+2025-04-10 23:18:39,949 - INFO - Scheduler has been shut down
+2025-04-10 23:18:40,860 - INFO -  * Restarting with stat
