@@ -899,3 +899,7 @@
 2025-04-10 23:46:29,446 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\test_app.py', reloading
 2025-04-10 23:46:29,446 - INFO - Scheduler has been shut down
 2025-04-10 23:46:30,235 - INFO -  * Restarting with stat
+2025-04-10 23:46:41,868 - INFO - \U0001f680 Application démarrée.
+2025-04-10 23:46:42,137 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-10 23:46:42,149 - WARNING -  * Debugger is active!
+2025-04-10 23:46:42,165 - INFO -  * Debugger PIN: 834-562-467
