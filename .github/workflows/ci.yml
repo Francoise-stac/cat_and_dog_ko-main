@@ -70,7 +70,7 @@ jobs:
       - name: Run unit tests
         run: |
           pytest test_app.py -v
-        env:
+        env:   
           TESTING: 'True'
           FLASK_APP: app.py
           FLASK_ENV: testing
