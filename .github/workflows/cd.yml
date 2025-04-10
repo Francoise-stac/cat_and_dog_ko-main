@@ -40,113 +40,26 @@ jobs:
           script_stop: true
           timeout: 120s
           script: |
+            # echo "hello world"
             set -e
+            echo "Logging into Docker Hub on the remote server..."
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            # echo "Testing connection..."
+            # whoami
+            # docker info
             
-            # Définir le nom de l'image
-            IMAGE_NAME="fdjeumen/cat_and_dog_ko-main-app:latest"
+            echo "Manipulating containers..."
+            docker stop cat-dog-app || true
+            docker rm cat-dog-app || true
+            docker rmi -f fdjeumen/cat_and_dog_ko-main-app:latest
             
-            echo "Vérification si l'image existe déjà sur le serveur..."
-            if docker image inspect $IMAGE_NAME >/dev/null 2>&1; then
-              echo "✅ L'image $IMAGE_NAME existe déjà localement, téléchargement non nécessaire"
-              IMAGE_PULL_NEEDED=false
-            else
-              echo "⚠️ L'image n'existe pas localement, téléchargement nécessaire"
-              IMAGE_PULL_NEEDED=true
-            fi
+            echo "Pulling new image..."
+            docker pull fdjeumen/cat_and_dog_ko-main-app:latest
             
-            # Connexion à Docker Hub seulement si nécessaire
-            if [ "$IMAGE_PULL_NEEDED" = true ]; then
-              echo "Connexion à Docker Hub..."
-              for i in {1..3}; do
-                echo "Tentative de connexion Docker Hub $i/3"
-                docker logout
-                if echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin; then
-                  echo "✅ Connexion réussie à Docker Hub"
-                  break
-                else
-                  echo "⚠️ Échec de la connexion, nouvelle tentative dans 5 secondes..."
-                  sleep 5
-                  if [ $i -eq 3 ]; then
-                    echo "❌ Impossible de se connecter à Docker Hub après 3 tentatives"
-                    echo "Utilisation de l'image locale si disponible..."
-                    IMAGE_PULL_NEEDED=false
-                  fi
-                fi
-              done
-            fi
-            
-            echo "Vérification des conteneurs existants..."
-            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
-              echo "Conteneur existant trouvé, obtention des détails..."
-              docker ps -a | grep cat-dog-app || true
-            else
-              echo "Aucun conteneur existant trouvé"
-            fi
-            
-            echo "Arrêt et suppression des anciens conteneurs..."
-            # Première tentative
-            docker stop cat-dog-app 2>/dev/null || echo "Aucun conteneur en cours d'exécution à arrêter"
-            sleep 2
-            docker rm -f cat-dog-app 2>/dev/null || echo "Première tentative: Aucun conteneur à supprimer"
-            
-            # Vérification supplémentaire
-            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
-              echo "Le conteneur persiste, deuxième tentative de suppression..."
-              docker kill cat-dog-app 2>/dev/null || echo "Impossible de tuer le conteneur"
-              sleep 2
-              docker rm -f cat-dog-app 2>/dev/null || echo "Deuxième tentative: Impossible de supprimer le conteneur"
-            fi
-            
-            # Vérification finale
-            if docker ps -a --format "{{.Names}}" | grep -q "cat-dog-app"; then
-              echo "ÉCHEC: Impossible de supprimer le conteneur. Utilisation d'un nom de conteneur différent..."
-              CONTAINER_NAME="cat-dog-app-$(date +%s)"
-              echo "Nouveau nom de conteneur: $CONTAINER_NAME"
-            else
-              echo "Conteneur supprimé avec succès"
-              CONTAINER_NAME="cat-dog-app"
-            fi
-            
-            # Téléchargement de l'image seulement si nécessaire
-            if [ "$IMAGE_PULL_NEEDED" = true ]; then
-              echo "Téléchargement de la nouvelle image..."
-              for i in {1..3}; do
-                echo "Tentative de téléchargement $i/3"
-                if docker pull $IMAGE_NAME; then
-                  echo "✅ Image téléchargée avec succès"
-                  break
-                else
-                  echo "⚠️ Échec du téléchargement, nouvelle tentative dans 5 secondes..."
-                  sleep 5
-                  if [ $i -eq 3]; then
-                    echo "❌ Impossible de télécharger l'image après 3 tentatives"
-                    echo "Vérification finale si l'image existe localement..."
-                    if ! docker image inspect $IMAGE_NAME >/dev/null 2>&1; then
-                      echo "Aucune image disponible, déploiement impossible"
-                      exit 1
-                    else
-                      echo "Image locale disponible, poursuite du déploiement"
-                    fi
-                  fi
-                fi
-              done
-            else
-              echo "Utilisation de l'image locale existante"
-            fi
-            
-            echo "Démarrage du nouveau conteneur avec le nom: $CONTAINER_NAME..."
+            echo "Starting new container..."
             docker run -d \
-              --name $CONTAINER_NAME \
+              --name cat-dog-app \
               -p 5000:5000 \
               -p 5001:5001 \
               --restart unless-stopped \
-              $IMAGE_NAME
-            
-            echo "Vérification que le conteneur est bien démarré..."
-            docker ps | grep $CONTAINER_NAME
-            
-            echo "Attente de 5 secondes pour laisser l'application démarrer..."
-            sleep 5
-            
-            echo "Logs du conteneur pour vérification:"
-            docker logs --tail 20 $CONTAINER_NAME
+              fdjeumen/cat_and_dog_ko-main-app:latest    
