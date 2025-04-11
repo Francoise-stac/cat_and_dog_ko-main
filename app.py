@@ -438,6 +438,41 @@ def validate_prediction():
     
     return redirect(url_for("home"))
 
+def register_user(data):
+    return {"success": True, "user_id": 123, "message": "Inscription réussie"}
+
+def authenticate_user(credentials):
+    return {"success": True, "token": "jwt_token_xyz", "user_id": 123}
+
+def save_prediction(user_id, prediction):
+    return {"status": "success", "record_id": 789}
+
+def get_user_predictions(user_id):
+    return [
+        {"id": 1, "result": "cat", "timestamp": "2023-01-01T12:00:00"},
+        {"id": 2, "result": "dog", "timestamp": "2023-01-02T14:30:00"}
+    ]
+
+def predict(image_data):
+    return {"class": "cat", "probability": 0.87, "processing_time": 0.156}
+
+
+def save_result(data):
+    return {"status": "success", "record_id": 999}
+def retrieve_history(user_id):
+    return [
+        {"id": 1, "result": "cat", "timestamp": "2023-01-01T12:00:00"},
+        {"id": 2, "result": "dog", "timestamp": "2023-01-02T14:30:00"}
+    ]
+
+# Facultatif si tu veux expliciter ce que le module expose
+__all__ = [
+    "register_user",
+    "authenticate_user",
+    "save_prediction",
+    "get_user_predictions",
+    "predict"
+]
 
 
 

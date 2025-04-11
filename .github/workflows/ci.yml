@@ -26,6 +26,7 @@ jobs:
           mkdir -p logs
           mkdir -p data/retraining/chat
           mkdir -p data/retraining/chien
+          mkdir -p data
           mkdir -p instance
           mkdir -p artifacts/rejected_images
           mkdir -p models
@@ -42,26 +43,40 @@ jobs:
           # S'assurer que flask_sqlalchemy est installé
           pip install flask_sqlalchemy flask_migrate
 
-      - name: Create dummy model file
+      # - name: Create dummy model file
+      #   run: |
+      #     python -c "
+      #     import os
+      #     import numpy as np
+      #     # Créer un fichier factice à la place du modèle Keras
+      #     with open('models/model.keras', 'wb') as f:
+      #         f.write(np.random.bytes(1024))
+      #     print('Fichier modèle factice créé avec succès')
+      #     "
+      - name: Start MLflow server in background
         run: |
-          python -c "
-          import os
-          import numpy as np
-          # Créer un fichier factice à la place du modèle Keras
-          with open('models/model.keras', 'wb') as f:
-              f.write(np.random.bytes(1024))
-          print('Fichier modèle factice créé avec succès')
-          "
+          nohup mlflow server \
+            --backend-store-uri sqlite:///data/mlflow.db \
+            --default-artifact-root ./artifacts \
+            --host 127.0.0.1 \
+            --port 5001 > mlflow.log 2>&1 &
+        env:
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5001
+
+      - name: Wait for MLflow to start
+        run: sleep 10
+
 
       - name: Run unit tests
         run: |
           pytest test_app.py -v
-        env:
+        env:   
           TESTING: 'True'
           FLASK_APP: app.py
           FLASK_ENV: testing
           MODEL_PATH: models/model.keras
           PYTHONPATH: ${{ github.workspace }}
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5001
 
       - name: Run functional tests
         run: |
@@ -73,6 +88,7 @@ jobs:
           MODEL_PATH: models/model.keras
           FLASK_APP: app.py
           FLASK_ENV: testing
+          MLFLOW_TRACKING_URI: http://127.0.0.1:5001
 
       - name: Upload test logs
         if: always()

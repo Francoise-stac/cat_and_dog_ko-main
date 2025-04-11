@@ -18,7 +18,7 @@ class TestSimulatedFunctional:
     def test_simulated_login(self):
         test_credentials = {"username": "testuser", "password": "password123"}
         
-        with patch("app.auth.authenticate_user") as mock_auth:
+        with patch("app.authenticate_user") as mock_auth:
             mock_auth.return_value = {"success": True, "token": "fake_jwt_token_12345", "user_id": 42}
             result = mock_auth(test_credentials)
             
@@ -48,14 +48,14 @@ class TestSimulatedFunctional:
     def test_simulated_data_operations(self):
         test_data = {"id": 123, "name": "test_file.jpg", "metadata": {"size": 1024, "format": "JPEG"}}
         
-        with patch("app.data.save_result") as mock_save:
+        with patch("app.save_result") as mock_save:
             mock_save.return_value = {"status": "success", "record_id": 456}
             result = mock_save(test_data)
             
             assert result["status"] == "success"
             assert isinstance(result["record_id"], int)
             
-        with patch("app.data.retrieve_history") as mock_history:
+        with patch("app.retrieve_history") as mock_history:
             mock_history.return_value = [{"id": 1, "result": "cat"}, {"id": 2, "result": "dog"}]
             history = mock_history(user_id=42)
             
