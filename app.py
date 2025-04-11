@@ -456,6 +456,10 @@ def get_user_predictions(user_id):
 def predict(image_data):
     return {"class": "cat", "probability": 0.87, "processing_time": 0.156}
 
+
+def save_result(data):
+    return {"status": "success", "record_id": 999}
+
 # Facultatif si tu veux expliciter ce que le module expose
 __all__ = [
     "register_user",
