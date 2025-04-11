@@ -5,3 +5,4 @@ deploy_key
 deploy_key.pub
 id_rsa.pem
 venv311/
+logs/app.log
