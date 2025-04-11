@@ -465,6 +465,7 @@ def retrieve_history(user_id):
         {"id": 2, "result": "dog", "timestamp": "2023-01-02T14:30:00"}
     ]
 
+
 # Facultatif si tu veux expliciter ce que le module expose
 __all__ = [
     "register_user",
