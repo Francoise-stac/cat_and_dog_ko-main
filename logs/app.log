@@ -952,3 +952,17 @@
 2025-04-11 14:37:45,406 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
 2025-04-11 14:37:45,417 - WARNING -  * Debugger is active!
 2025-04-11 14:37:45,430 - INFO -  * Debugger PIN: 834-562-467
+2025-04-11 15:09:29,680 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\tests\\test_functional.py', reloading
+2025-04-11 15:09:29,683 - INFO - Scheduler has been shut down
+2025-04-11 15:09:30,571 - INFO -  * Restarting with stat
+2025-04-11 15:09:41,193 - INFO - \U0001f680 Application démarrée.
+2025-04-11 15:09:41,453 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-11 15:09:41,461 - WARNING -  * Debugger is active!
+2025-04-11 15:09:41,469 - INFO -  * Debugger PIN: 834-562-467
+2025-04-11 15:09:46,559 - INFO -  * Detected change in 'C:\\Users\\Francy\\Documents\\cat_and_dog_ko-main\\app.py', reloading
+2025-04-11 15:09:46,560 - INFO - Scheduler has been shut down
+2025-04-11 15:09:47,393 - INFO -  * Restarting with stat
+2025-04-11 15:09:58,049 - INFO - \U0001f680 Application démarrée.
+2025-04-11 15:09:58,286 - INFO - \U0001f7e2 Serveur Flask lancé (port 5000)
+2025-04-11 15:09:58,295 - WARNING -  * Debugger is active!
+2025-04-11 15:09:58,305 - INFO -  * Debugger PIN: 834-562-467

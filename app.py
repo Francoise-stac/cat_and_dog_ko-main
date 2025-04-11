@@ -459,6 +459,11 @@ def predict(image_data):
 
 def save_result(data):
     return {"status": "success", "record_id": 999}
+def retrieve_history(user_id):
+    return [
+        {"id": 1, "result": "cat", "timestamp": "2023-01-01T12:00:00"},
+        {"id": 2, "result": "dog", "timestamp": "2023-01-02T14:30:00"}
+    ]
 
 # Facultatif si tu veux expliciter ce que le module expose
 __all__ = [

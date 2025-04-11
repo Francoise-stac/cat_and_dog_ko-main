@@ -55,7 +55,7 @@ class TestSimulatedFunctional:
             assert result["status"] == "success"
             assert isinstance(result["record_id"], int)
             
-        with patch("app.data.retrieve_history") as mock_history:
+        with patch("app.retrieve_history") as mock_history:
             mock_history.return_value = [{"id": 1, "result": "cat"}, {"id": 2, "result": "dog"}]
             history = mock_history(user_id=42)
             
