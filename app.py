@@ -457,6 +457,7 @@ def predict(image_data):
     return {"class": "cat", "probability": 0.87, "processing_time": 0.156}
 
 
+
 def save_result(data):
     return {"status": "success", "record_id": 999}
 def retrieve_history(user_id):
